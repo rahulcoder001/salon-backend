@@ -5,7 +5,7 @@ const compression = require("compression");
 const morgan = require("morgan");
 
 const userRoutes = require("./routes/userRoutes");
-const sendRoutes=require("./routes/sendEmailRoutes")
+const staffRoutes = require("./routes/staffRoutes")
 
 const app = express();
 
@@ -18,7 +18,7 @@ app.use(morgan("dev"));
 
 // Routes
 app.use("/api/users", userRoutes);
-app.use('/api/email', sendEmailRoutes);
+app.use("/api/staff",staffRoutes)
 
 app.get("/", (req, res) => {
   res.send("API is running...");
