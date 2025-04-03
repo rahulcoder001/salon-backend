@@ -8,39 +8,77 @@ datasource db {
 }
 
 model User {
-  id          Int     @id @default(autoincrement())
-  fullname    String
-  contact     String
-  email       String  @unique
-  password    String
-  profile_img String?
-  staff       Staff?
-  clients     Client[]
+  id         Int     @id @default(autoincrement())
+  fullname   String
+  email      String  @unique
+  contact    String 
+  password   String
+  profile_img String?  
+  salon_id   Int?    
+  
+  salon      Salon?   @relation(fields: [salon_id], references: [id]) 
+  staff      Staff[]
 }
 
 model Staff {
-  id          Int     @id @default(autoincrement())
-  fullname    String
-  contact     String
-  email       String  @unique
-  password    String
+  id        Int     @id @default(autoincrement())
+  fullname  String
+  email     String  @unique
+  contact   String  @unique
+  password  String
   profile_img String?
-  user_id     Int     @unique
+  user_id   Int     
+  branch_id Int     
+  staff_id  String  @unique
 
-  user        User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  clients     Client[]
+  user      User   @relation(fields: [user_id], references: [id])
+  branch    Branch @relation(fields: [branch_id], references: [id])
+  clients   Client[]
+}
+
+model Salon {
+  id              Int     @id @default(autoincrement())
+  salon_name      String
+  salon_tag       String
+  opening_time    String?
+  contact_email   String
+  contact_number  String
+  branch_url      String?
+  salon_img_url   String?
+  
+  branches        Branch[]
+  users          User[]
+}
+
+model Branch {
+  id              Int     @id @default(autoincrement())
+  branch_name     String
+  branch_location String
+  salon_id        Int     
+  
+  salon           Salon   @relation(fields: [salon_id], references: [id])
+  staff           Staff[]
+  inventory       Inventory[]
+  clients        Client[]
+}
+
+model Inventory {
+  id              Int     @id @default(autoincrement())
+  product_name    String
+  product_quantity Int
+  branch_id       Int     
+
+  branch          Branch  @relation(fields: [branch_id], references: [id])
 }
 
 model Client {
-  id          Int     @id @default(autoincrement())
+  id         Int     @id @default(autoincrement())
   client_name String
-  email       String  @unique
-  contact     String?
-  password    String
-  profile_img String?
-  user_id     Int
-  staff_id    Int?
+  email       String
+  contact     String
+  branch_id   Int     
+  staff_id    Int?    
 
-  user        User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  staff       Staff? @relation(fields: [staff_id], references: [id], onDelete: SetNull)
+  branch      Branch  @relation(fields: [branch_id], references: [id])
+  staff       Staff?  @relation(fields: [staff_id], references: [id])
 }
