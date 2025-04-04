@@ -621,6 +621,136 @@ const forgotPasswordMail = (req, res) => {
     });
 };
 
+const passwordResetConfirmation = (req, res) => {
+    const { to } = req.body;
+
+    // Validate email
+    if (!to) {
+        return res.status(400).json({ error: 'Email address is required' });
+    }
+
+    // HTML Template
+    const createConfirmationTemplate = () => `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            .container { 
+                max-width: 600px; 
+                margin: 2rem auto; 
+                background: #f9f9f9; 
+                border-radius: 15px; 
+                overflow: hidden;
+                font-family: 'Segoe UI', sans-serif;
+            }
+            .header {
+                background: #4CAF50;
+                color: white;
+                padding: 2rem;
+                text-align: center;
+            }
+            .checkmark {
+                font-size: 4rem;
+                margin-bottom: 1rem;
+            }
+            .content-section {
+                padding: 2rem;
+                text-align: center;
+                background: white;
+                margin: 2rem;
+                border-radius: 10px;
+                border: 2px dashed #e7d4d6;
+            }
+            .success-text {
+                color: #2E7D32;
+                font-size: 1.5rem;
+                margin: 1rem 0;
+                font-weight: 600;
+            }
+            .note {
+                color: #666;
+                font-size: 0.9rem;
+                line-height: 1.6;
+                margin: 1rem 0;
+            }
+            .button {
+                display: inline-block;
+                background: #4CAF50;
+                color: white;
+                padding: 0.8rem 2rem;
+                text-decoration: none;
+                border-radius: 5px;
+                margin-top: 1rem;
+                transition: background 0.3s ease;
+            }
+            .button:hover {
+                background: #45a049;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <div class="checkmark">✔</div>
+                <h1>Password Updated Successfully!</h1>
+            </div>
+
+            <div class="content-section">
+                <p class="success-text">Your SalonSphere password has been successfully reset</p>
+                
+                <p class="note">If you made this change:</p>
+                <p class="note">🎉 Enjoy your secure account access!</p>
+                
+                <p class="note" style="color: #c23b3b;">
+                    If you didn't make this change:<br>
+                    🔒 Secure your account immediately by contacting our support team
+                </p>
+            </div>
+
+            <div style="text-align: center; padding: 1rem;">
+                <p class="note">Need help? Contact our 24/7 support team at support@salonsphere.com</p>
+                <a href="https://salon.edubotix.online" class="button">Access Your Account</a>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+
+    // Email configuration
+    const subject = "Password Updated Successfully ✔ - SalonSphere";
+    const html = createConfirmationTemplate();
+    const text = `SalonSphere Password Reset Confirmation\n\n`
+               + `Your password has been successfully updated.\n\n`
+               + "If you didn't make this change, please contact our support team immediately.\n\n"
+               + "Best regards,\n"
+               + "SalonSphere Security Team";
+
+    const mailOptions = {
+        from: '"SalonSphere Security" <satyammaurya9620@gmail.com>',
+        to: to,
+        subject: subject,
+        text: text,
+        html: html
+    };
+
+    // Send email
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.error('Confirmation email error:', error);
+            return res.status(500).json({ 
+                error: 'Failed to send confirmation email',
+                details: error.message 
+            });
+        }
+        
+        console.log('Password reset confirmation sent:', info.response);
+        res.status(200).json({
+            message: 'Password reset confirmation sent successfully',
+            info: info
+        });
+    });
+};
 
 
-module.exports = { Sendotp , welcomMail,forgotPasswordMail };
+
+module.exports = { Sendotp , welcomMail,forgotPasswordMail , passwordResetConfirmation};
