@@ -6,7 +6,6 @@ const generateToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 
-// **User Signup**
 const userSignup = async (req, res) => {
   const { fullname, contact, email, password, profile_img } = req.body;
 
@@ -18,7 +17,7 @@ const userSignup = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user
+    // Create new user (DO NOT pass `id`)
     const newUser = await prisma.user.create({
       data: {
         fullname,
@@ -32,28 +31,17 @@ const userSignup = async (req, res) => {
     // Generate JWT token
     const token = generateToken(newUser.id, "user");
 
-    // Fetch user again to include salonId
-    const userWithSalon = await prisma.user.findUnique({
-      where: { id: newUser.id },
-      select: {
-        id: true,
-        fullname: true,
-        contact: true,
-        email: true,
-        profile_img: true,
-        salonId: true, // ✅ Corrected field name
-      },
-    });
-
     res.status(201).json({
       message: "User registered successfully",
       token,
-      user: userWithSalon,
+      user: newUser,
     });
   } catch (error) {
+    console.error("Signup Error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
 
 // **User Login**
 const userLogin = async (req, res) => {
