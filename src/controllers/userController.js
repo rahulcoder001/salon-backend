@@ -97,11 +97,11 @@ const changePassword = async (req, res) => {
 
 // Final version recommendation
 const getUserById = async (req, res) => {
-  const { user_idd } = req.params;
+  const { user_id } = req.params;
 
   try {
     const user = await prisma.user.findUnique({
-      where: { id: user_idd },
+      where: { id: user_id },
       select: {
         id: true,
         fullname: true,
