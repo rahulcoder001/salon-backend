@@ -13,7 +13,6 @@ const app = express();
 
 // Middlewares
 app.use(express.json());
-const cors = require("cors");
 
 // CORS Configuration
 const corsOptions = {
