@@ -7,6 +7,8 @@ const morgan = require("morgan");
 const userRoutes = require("./routes/userRoutes");
 const staffRoutes = require("./routes/staffRoutes")
 const otpRoutes=require("./routes/sendEmailRoutes")
+const salonRoutes = require("./routes/salonRoutes")
+const branchRoutes = require("./routes/branchRoutes")
 const app = express();
 
 // Middlewares
@@ -18,8 +20,11 @@ app.use(morgan("dev"));
 
 // Routes
 app.use("/api/users", userRoutes);
-app.use("/api/staff",staffRoutes)
-app.use("/api/email",otpRoutes)
+app.use("/api/staff",staffRoutes);
+app.use("/api/email",otpRoutes);
+app.use("/api/salon",salonRoutes)
+app.use("/api/branch", branchRoutes)
+
 
 app.get("/", (req, res) => {
   res.send("API is running...");
