@@ -32,9 +32,26 @@ const userSignup = async (req, res) => {
     // Generate JWT token
     const token = generateToken(newUser.id, "user");
 
-    res.status(201).json({ message: "User registered successfully", token, user: newUser });
+    // Fetch user again to include salonId
+    const userWithSalon = await prisma.user.findUnique({
+      where: { id: newUser.id },
+      select: {
+        id: true,
+        fullname: true,
+        contact: true,
+        email: true,
+        profile_img: true,
+        salonId: true, // ✅ Corrected field name
+      },
+    });
+
+    res.status(201).json({
+      message: "User registered successfully",
+      token,
+      user: userWithSalon,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
@@ -52,9 +69,26 @@ const userLogin = async (req, res) => {
 
     const token = generateToken(user.id, "user");
 
-    res.status(200).json({ message: "Login successful", token, user });
+    // Fetch user again to include salonId
+    const userWithSalon = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: {
+        id: true,
+        fullname: true,
+        contact: true,
+        email: true,
+        profile_img: true,
+        salonId: true, // ✅ Corrected field name
+      },
+    });
+
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user: userWithSalon,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
