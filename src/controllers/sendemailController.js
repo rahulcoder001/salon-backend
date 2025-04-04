@@ -500,6 +500,127 @@ const welcomMail = (req, res) => {
     });
 };
 
+const forgotPasswordMail = (req, res) => {
+    const { to } = req.body;
+    
+    // Validate email
+    if (!to) {
+        return res.status(400).json({ error: 'Email address is required' });
+    }
+
+    // Generate 6-digit OTP
+    const generateOTP = () => Math.floor(100000 + Math.random() * 900000);
+    const otp = generateOTP().toString();
+
+    // HTML Template
+    const createPasswordResetTemplate = (otp) => `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            .container { 
+                max-width: 600px; 
+                margin: 2rem auto; 
+                background: #fff8f9; 
+                border-radius: 15px; 
+                overflow: hidden;
+                font-family: 'Segoe UI', sans-serif;
+            }
+            .header {
+                background: #b76e79;
+                color: white;
+                padding: 2rem;
+                text-align: center;
+            }
+            .otp-section {
+                padding: 2rem;
+                text-align: center;
+                background: white;
+                margin: 2rem;
+                border-radius: 10px;
+                border: 2px dashed #e7d4d6;
+            }
+            .otp-code {
+                font-size: 2.5rem;
+                letter-spacing: 0.5rem;
+                color: #b76e79;
+                margin: 1rem 0;
+                font-weight: 700;
+            }
+            .note {
+                color: #666;
+                font-size: 0.9rem;
+                line-height: 1.6;
+                margin: 1rem 0;
+            }
+            .button {
+                display: inline-block;
+                background: #b76e79;
+                color: white;
+                padding: 0.8rem 2rem;
+                text-decoration: none;
+                border-radius: 5px;
+                margin-top: 1rem;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>SalonSphere Password Reset 🔒</h1>
+                <p>Your Security is Our Priority</p>
+            </div>
+
+            <div class="otp-section">
+                <p class="note">Use this OTP to reset your password:</p>
+                <div class="otp-code">${otp}</div>
+                <p class="note" style="color: #c23b3b;">Valid for 10 minutes only</p>
+            </div>
+
+            <div style="text-align: center; padding: 1rem;">
+                <p class="note">If you didn't request this, please ignore this email or contact our support team immediately.</p>
+                <a href="https://salon.edubotix.online" class="button">Visit SalonSphere</a>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+
+    // Email configuration
+    const subject = "SalonSphere Password Reset OTP 🔑";
+    const html = createPasswordResetTemplate(otp);
+    const text = `SalonSphere Password Reset\n\n`
+               + `OTP: ${otp}\n`
+               + "This OTP is valid for 10 minutes\n\n"
+               + "If you didn't request this, please contact support.";
+
+    const mailOptions = {
+        from: '"SalonSphere Security" <satyammaurya9620@gmail.com>',
+        to: to,
+        subject: subject,
+        text: text,
+        html: html
+    };
+
+    // Send email
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.error('Password reset email error:', error);
+            return res.status(500).json({ 
+                error: 'Failed to send password reset email',
+                details: error.message 
+            });
+        }
+        
+        console.log('Password reset OTP sent:', info.response);
+        res.status(200).json({
+            message: 'Password reset OTP sent successfully',
+            otp: otp, // Remove this in production
+            info: info
+        });
+    });
+};
 
 
-module.exports = { Sendotp , welcomMail };
+
+module.exports = { Sendotp , welcomMail,forgotPasswordMail };
