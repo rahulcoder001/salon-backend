@@ -8,77 +8,76 @@ datasource db {
 }
 
 model User {
-  id         Int     @id @default(autoincrement())
-  fullname   String
-  email      String  @unique
-  contact    String 
-  password   String
-  profile_img String?  
-  salon_id   Int?    
-  
-  salon      Salon?   @relation(fields: [salon_id], references: [id]) 
-  staff      Staff[]
+  id          String  @id @default(uuid())
+  fullname    String
+  email       String  @unique
+  contact     String
+  password    String
+  profile_img String?
+  salonId     String? // changed to String
+  salon       Salon?  @relation(fields: [salonId], references: [id])
+  staff       Staff[]
 }
 
 model Staff {
-  id        Int     @id @default(autoincrement())
-  fullname  String
-  email     String  @unique
-  contact   String  @unique
-  password  String
+  id          String  @id @default(uuid())
+  fullname    String
+  email       String  @unique
+  contact     String  @unique
+  password    String
   profile_img String?
-  user_id   Int     
-  branch_id Int     
-  staff_id  String  @unique
+  user_id     String
+  branch_id   String
+  staff_id    String  @unique
 
-  user      User   @relation(fields: [user_id], references: [id])
-  branch    Branch @relation(fields: [branch_id], references: [id])
-  clients   Client[]
+  user    User     @relation(fields: [user_id], references: [id])
+  branch  Branch   @relation(fields: [branch_id], references: [id])
+  clients Client[]
 }
 
 model Salon {
-  id              Int     @id @default(autoincrement())
-  salon_name      String
-  salon_tag       String
-  opening_time    String?
-  contact_email   String
-  contact_number  String
-  branch_url      String?
-  salon_img_url   String?
-  
-  branches        Branch[]
-  users          User[]
+  id             String  @id @default(uuid())
+  salon_name     String
+  salon_tag      String
+  opening_time   String?
+  contact_email  String
+  contact_number String
+  branch_url     String?
+  salon_img_url  String?
+
+  branches Branch[]
+  users    User[]
 }
 
 model Branch {
-  id              Int     @id @default(autoincrement())
+  id              String @id @default(uuid())
   branch_name     String
   branch_location String
-  salon_id        Int     
-  
-  salon           Salon   @relation(fields: [salon_id], references: [id])
-  staff           Staff[]
-  inventory       Inventory[]
-  clients        Client[]
+  salon_id        String
+
+  salon     Salon       @relation(fields: [salon_id], references: [id])
+  staff     Staff[]
+  inventory Inventory[]
+  clients   Client[]
 }
 
 model Inventory {
-  id              Int     @id @default(autoincrement())
-  product_name    String
+  id               String @id @default(uuid())
+  product_name     String
   product_quantity Int
-  branch_id       Int     
+  branch_id        String
 
-  branch          Branch  @relation(fields: [branch_id], references: [id])
+  branch Branch @relation(fields: [branch_id], references: [id])
 }
 
 model Client {
-  id         Int     @id @default(autoincrement())
+  id          String  @id @default(uuid())
   client_name String
   email       String
   contact     String
-  branch_id   Int     
-  staff_id    Int?    
+  branch_id   String
+  staff_id    String?
 
-  branch      Branch  @relation(fields: [branch_id], references: [id])
-  staff       Staff?  @relation(fields: [staff_id], references: [id])
+  branch Branch @relation(fields: [branch_id], references: [id])
+  staff  Staff? @relation(fields: [staff_id], references: [id])
 }
