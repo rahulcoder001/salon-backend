@@ -13,7 +13,18 @@ const app = express();
 
 // Middlewares
 app.use(express.json());
-app.use(cors());
+const cors = require("cors");
+
+// CORS Configuration
+const corsOptions = {
+  origin: ["http://localhost:3000", "https://salon.edubotix.online"], // Allow localhost and deployed frontend
+  methods: "GET,POST,PUT,DELETE",
+  allowedHeaders: "Content-Type,Authorization",
+  credentials: true, // Allow cookies & authentication headers
+};
+
+// Apply CORS with options
+app.use(cors(corsOptions));
 app.use(helmet());
 app.use(compression());
 app.use(morgan("dev"));
