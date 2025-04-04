@@ -1,11 +1,21 @@
 const express = require("express");
-const { userLogin , userSignup, changePassword} = require("../controllers/userController");
+const { 
+  userLogin, 
+  userSignup, 
+  changePassword, 
+  getUserById  // ✅ Step 1: Import the controller
+} = require("../controllers/userController");
 
 const router = express.Router();
 
-// User Login Route
-router.post("/signup", userSignup)
+// User Signup & Login
+router.post("/signup", userSignup);
 router.post("/login", userLogin);
-router.post("/forgetpassword", changePassword)
+
+// Password reset
+router.post("/forgetpassword", changePassword);
+
+// ✅ Step 2: Add route to get user by ID
+router.get("/:user_id", getUserById);
 
 module.exports = router;
