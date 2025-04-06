@@ -34,4 +34,25 @@ const addBranch = async (req, res) => {
   }
 };
 
-module.exports = { addBranch };
+const IsBranch = async (req, res) => {
+  const { salon_id } = req.body;
+
+  try {
+    // Check if the salon exists
+    const existingBranch = await prisma.branch.findMany({
+      where: { salon_id: salon_id },
+    });
+
+    if (!existingBranch) {
+      return res.status(201).json({ isbranch: true });
+    }
+    else {
+      return res.status(201).json({ isbranch: false });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+module.exports = { addBranch , IsBranch };
