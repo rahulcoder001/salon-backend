@@ -2,7 +2,7 @@ const prisma = require("../config/db");
 
 // **Add Branch**
 const addBranch = async (req, res) => {
-  const { branch_name, branch_location, salon_id } = req.body;
+  const { branch_name, branch_location, salon_id , contact_email,contact_number,opning_time,closeings_time} = req.body;
 
   try {
     // Check if the salon exists
@@ -20,6 +20,10 @@ const addBranch = async (req, res) => {
         branch_name,
         branch_location,
         salon_id,
+        contact_email,
+        contact_number,
+        opning_time,
+        closeings_time
       },
     });
 

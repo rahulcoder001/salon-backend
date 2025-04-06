@@ -68,6 +68,7 @@ model Inventory {
   id               String @id @default(uuid())
   product_name     String
   product_quantity Int
+  price            Int
   branch_id        String
 
   branch Branch @relation(fields: [branch_id], references: [id])
