@@ -109,6 +109,7 @@ const getUserById = async (req, res) => {
         contact: true,
         profile_img: true,
         salonId: true,
+        step: true,
       },
     });
 
