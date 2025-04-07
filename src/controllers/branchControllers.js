@@ -34,6 +34,8 @@ const addBranch = async (req, res) => {
   }
 };
 
+
+
 const IsBranch = async (req, res) => {
   const { salon_id } = req.body;
 
@@ -44,10 +46,10 @@ const IsBranch = async (req, res) => {
     });
 
     if (existingBranch.length != 0) {
-      return res.status(201).json({ isbranch: true });
+      return res.status(201).json({ isbranch: true , brances:existingBranch });
     }
     else {
-      return res.status(201).json({ isbranch: false });
+      return res.status(201).json({ isbranch: false , branch:[]});
     }
   } catch (error) {
     console.error(error);
