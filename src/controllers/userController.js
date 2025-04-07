@@ -22,6 +22,7 @@ const userSignup = async (req, res) => {
         email,
         password: hashedPassword,
         profile_img,
+        step:1
       },
     });
 
