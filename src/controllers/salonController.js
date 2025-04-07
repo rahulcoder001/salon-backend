@@ -37,7 +37,7 @@ const createSalon = async (req, res) => {
     // Update user's salon_id with the newly created salon's ID
     await prisma.user.update({
       where: { id: user_id },
-      data: { salonId: newSalon.id },
+      data: { salonId: newSalon.id , step:1 },
     });
 
     res.status(201).json({ message: "Salon created successfully", salon: newSalon });

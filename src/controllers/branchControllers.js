@@ -43,7 +43,7 @@ const IsBranch = async (req, res) => {
       where: { salon_id: salon_id },
     });
 
-    if (!existingBranch) {
+    if (existingBranch.length != 0) {
       return res.status(201).json({ isbranch: true });
     }
     else {
