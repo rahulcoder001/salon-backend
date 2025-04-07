@@ -22,6 +22,7 @@ const userSignup = async (req, res) => {
         email,
         password: hashedPassword,
         profile_img,
+        step:1
       },
     });
 
@@ -109,10 +110,11 @@ const getUserById = async (req, res) => {
         contact: true,
         profile_img: true,
         salonId: true,
+        step: true,
       },
     });
 
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) return res.status(404).json({ message: "User no found" });
 
     res.status(200).json({ user });
   } catch (error) {
