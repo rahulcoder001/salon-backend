@@ -2,6 +2,24 @@ const prisma = require("../config/db");
 
 // **Create Salon**
 const createSalon = async (req, res) => {
+  if(req.body.salonId){
+      const {user_id ,step } = req.body;
+      const existingUser = await prisma.user.findUnique({
+        where: { id: user_id },
+      });
+      if (!existingUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      else{
+        await prisma.user.update({
+          where: { id: user_id },
+          data: { step: step+1 },
+        });
+        
+        return res.status(201).json({ message: "step updeted"});
+      }
+  }
+
   const {
     salon_name,
     salon_tag,
