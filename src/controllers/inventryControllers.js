@@ -1,10 +1,13 @@
 const prisma = require("../config/db");
 
 const SaveProduct = async (req, res) => {
-
-  const { product_name, product_quantity, price, branch_id } = req.body;
+  let { product_name, product_quantity, price, branch_id } = req.body;
 
   try {
+    // Convert to numbers
+    product_quantity = parseInt(product_quantity);
+    price = parseInt(price);
+
     const newInventory = await prisma.inventory.create({
       data: {
         product_name,
@@ -21,12 +24,14 @@ const SaveProduct = async (req, res) => {
   }
 };
 
-
- const saveService = async (req, res) => {
-
-  const { service_name, service_price, time, branch_id } = req.body;
+const saveService = async (req, res) => {
+  let { service_name, service_price, time, branch_id } = req.body;
 
   try {
+    // Convert to numbers
+    service_price = parseInt(service_price);
+    time = parseInt(time);
+
     const newService = await prisma.service.create({
       data: {
         service_name,
@@ -43,4 +48,4 @@ const SaveProduct = async (req, res) => {
   }
 };
 
-module.exports = { SaveProduct , saveService };
+module.exports = { SaveProduct, saveService };
