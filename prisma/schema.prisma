@@ -63,6 +63,7 @@ model Branch {
   staff           Staff[]
   inventory       Inventory[]
   clients         Client[]
+  service         Service[]
 }
 
 model Inventory {
@@ -72,6 +73,15 @@ model Inventory {
   price            Int
   branch_id        String
 
+  branch Branch @relation(fields: [branch_id], references: [id])
+}
+
+model Service {
+  id               String @id @default(uuid())
+  service_name     String
+  service_price   Int
+  time            Int
+  branch_id        String
   branch Branch @relation(fields: [branch_id], references: [id])
 }
 
