@@ -40,17 +40,46 @@ const IsBranch = async (req, res) => {
   const { salon_id } = req.body;
 
   try {
-    // Check if the salon exists
-    const existingBranch = await prisma.branch.findMany({
+    // Get all branches for the salon
+    const branches = await prisma.branch.findMany({
       where: { salon_id: salon_id },
     });
 
-    if (existingBranch.length != 0) {
-      return res.status(201).json({ isbranch: true , brances:existingBranch });
+    if (branches.length === 0) {
+      return res.status(201).json({ isbranch: false, branches: [], staffCount: [] });
     }
-    else {
-      return res.status(201).json({ isbranch: false , branch:[]});
-    }
+
+    // Get branch IDs for counting staff
+    const branchIds = branches.map(branch => branch.id);
+
+    // Get staff counts for all branches in one query
+    const staffCounts = await prisma.staff.groupBy({
+      by: ['branch_id'],
+      where: {
+        branch_id: { in: branchIds }
+      },
+      _count: {
+        id: true
+      }
+    });
+
+    // Create a map for quick lookup
+    const countMap = new Map();
+    staffCounts.forEach(({ branch_id, _count }) => {
+      countMap.set(branch_id, _count.id);
+    });
+
+    // Create staffCount array matching branches order
+    const staffCountArray = branches.map(branch => 
+      countMap.get(branch.id) || 0
+    );
+
+    return res.status(201).json({
+      isbranch: true,
+      branches: branches,
+      staffCount: staffCountArray
+    });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
