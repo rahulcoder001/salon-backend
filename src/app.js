@@ -9,6 +9,7 @@ const staffRoutes = require("./routes/staffRoutes")
 const salonRoutes = require("./routes/salonRoutes")
 const branchRoutes = require("./routes/branchRoutes")
 const sendEmailRoutes = require("./routes/sendEmailRoutes")
+const inventryRoutes = require("./routes/inventryRoutes")
 const app = express();
 
 // Middlewares
@@ -31,8 +32,9 @@ app.use(morgan("dev"));
 app.use("/api/users", userRoutes);
 app.use("/api/staff",staffRoutes);
 app.use("/api/email",sendEmailRoutes);
-app.use("/api/salon",salonRoutes)
-app.use("/api/branch", branchRoutes)
+app.use("/api/salon",salonRoutes);
+app.use("/api/branch", branchRoutes);
+app.use("/api/inventry",inventryRoutes )
 
 
 app.get("/", (req, res) => {
