@@ -1,9 +1,6 @@
-import { prisma } from "@/lib/prisma"; // adjust import based on your setup
+const prisma = require("../config/db");
 
-export const SaveProduct = async (req, res) => {
-  if (req.method !== "POST") {
-    return res.status(405).json({ message: "Method Not Allowed" });
-  }
+const SaveProduct = async (req, res) => {
 
   const { product_name, product_quantity, price, branch_id } = req.body;
 
@@ -25,10 +22,7 @@ export const SaveProduct = async (req, res) => {
 };
 
 
-export const saveService = async (req, res) => {
-  if (req.method !== "POST") {
-    return res.status(405).json({ message: "Method Not Allowed" });
-  }
+ const saveService = async (req, res) => {
 
   const { service_name, service_price, time, branch_id } = req.body;
 
@@ -49,3 +43,4 @@ export const saveService = async (req, res) => {
   }
 };
 
+module.exports = { SaveProduct , saveService };
