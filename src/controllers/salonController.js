@@ -65,4 +65,23 @@ const createSalon = async (req, res) => {
   }
 };
 
-module.exports = { createSalon };
+const getSalonById = async (req, res) => {
+  const { id } = req.body; // Get salon ID from request params
+
+  try {
+    const salon = await prisma.salon.findUnique({
+      where: { id: id },
+    });
+
+    if (!salon) {
+      return res.status(404).json({ message: "Salon not found" });
+    }
+
+    res.status(200).json({ salon });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+module.exports = { createSalon , getSalonById };
