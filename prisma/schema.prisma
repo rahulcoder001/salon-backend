@@ -81,7 +81,7 @@ model Service {
   service_name     String
   service_price   Int
   time            Int
-  branch_id        String
+  branch_id       String
   branch Branch @relation(fields: [branch_id], references: [id])
 }
 

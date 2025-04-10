@@ -16,10 +16,10 @@ const app = express();
 app.use(express.json());
 // CORS Configuration
 const corsOptions = {
-  origin: ["http://localhost:3000", "https://salon.edubotix.online"],
+  origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
+  credentials: false,
 };
 
 app.use(cors(corsOptions));
