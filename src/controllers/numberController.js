@@ -67,4 +67,37 @@ const getTotalClientsBySalonId = async (req, res) => {
     }
   };
 
- module.exports={getTotalClientsBySalonId,getTotalStaffBySalonId}
+  const getTotalServicesBySalonId = async (req, res) => {
+    const { salonId } = req.params;
+  
+    try {
+      // Verify salon exists
+      const salonExists = await prisma.salon.findUnique({
+        where: { id: salonId },
+      });
+  
+      if (!salonExists) {
+        return res.status(404).json({ message: 'Salon not found' });
+      }
+  
+      // Count services across all branches of the salon
+      const totalServices = await prisma.service.count({
+        where: {
+          branch: {
+            salon_id: salonId,
+          },
+        },
+      });
+  
+      return res.status(200).json({ 
+        message: 'Total services retrieved successfully',
+        totalServices 
+      });
+  
+    } catch (error) {
+      console.error('Error getting total services:', error);
+      return res.status(500).json({ message: 'Failed to retrieve services count' });
+    }
+  };
+
+ module.exports={getTotalClientsBySalonId,getTotalStaffBySalonId,getTotalServicesBySalonId}
