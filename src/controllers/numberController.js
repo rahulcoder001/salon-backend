@@ -96,7 +96,7 @@ const getTotalClientsBySalonId = async (req, res) => {
   
     } catch (error) {
       console.error('Error getting total services:', error);
-      return res.status(500).json({ message: 'Failed to retrieve services count' });
+      return res.status(500).json({ message: 'Failed to retrieve services count',error:error });
     }
   };
 
