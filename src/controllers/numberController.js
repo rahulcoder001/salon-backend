@@ -1,4 +1,6 @@
 const prisma = require("../config/db");
+
+
 const getTotalClientsBySalonId = async (req, res) => {
     const { salonId } = req.params;
   
@@ -32,4 +34,37 @@ const getTotalClientsBySalonId = async (req, res) => {
     }
   };
 
- module.exports={getTotalClientsBySalonId}
+ const getTotalStaffBySalonId = async (req, res) => {
+    const { salonId } = req.params;
+  
+    try {
+      // Check if salon exists
+      const salonExists = await prisma.salon.findUnique({
+        where: { id: salonId },
+      });
+  
+      if (!salonExists) {
+        return res.status(404).json({ message: 'Salon not found' });
+      }
+  
+      // Count staff across all branches of the salon
+      const totalStaff = await prisma.staff.count({
+        where: {
+          branch: {
+            salon_id: salonId,
+          },
+        },
+      });
+  
+      return res.status(200).json({ 
+        message: 'Total staff retrieved successfully',
+        totalStaff 
+      });
+  
+    } catch (error) {
+      console.error('Error getting total staff:', error);
+      return res.status(500).json({ message: 'Failed to retrieve staff count' });
+    }
+  };
+
+ module.exports={getTotalClientsBySalonId,getTotalStaffBySalonId}
