@@ -1,4 +1,4 @@
-
+const prisma = require("../config/db");
 const getTotalClientsBySalonId = async (req, res) => {
     const { salonId } = req.params;
   
