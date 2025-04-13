@@ -1,3 +1,4 @@
+
 const getTotalClientsBySalonId = async (req, res) => {
     const { salonId } = req.params;
   
@@ -30,3 +31,5 @@ const getTotalClientsBySalonId = async (req, res) => {
       return res.status(500).json({ message: 'Failed to retrieve client count' });
     }
   };
+
+ module.exports={getTotalClientsBySalonId}
