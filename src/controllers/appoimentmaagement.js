@@ -1,3 +1,6 @@
+const prisma = require("../config/db");
+
+
 const createAppointment = async (req, res) => {
   const {
     salon_id,
@@ -23,6 +26,8 @@ const createAppointment = async (req, res) => {
     ) {
       return res.status(400).json({ message: "Missing required fields" });
     }
+
+
 
     // Check if related entities exist
     const [salon, branch, staff, service, client] = await Promise.all([
@@ -176,4 +181,56 @@ const deleteAppointment = async (req, res) => {
     });
   }
 };
-module.exports = {createAppointment , getAppointmentsBySalon , deleteAppointment , updateAppointment};
+
+
+const getSalonRevenueLast30Days = async (req, res) => {
+  const { salonId } = req.params;
+
+  try {
+    // Verify salon exists
+    const salonExists = await prisma.salon.findUnique({
+      where: { id: salonId },
+    });
+
+    if (!salonExists) {
+      return res.status(404).json({ message: 'Salon not found' });
+    }
+
+    // Calculate date 30 days ago
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    // Get all appointments for the salon's branches in last 30 days
+    const appointments = await prisma.appointment.findMany({
+      where: {
+        salon_id: salonId,
+        date: {
+          gte: thirtyDaysAgo.toISOString(),
+        }
+      },
+      include: {
+        service: {
+          select: {
+            service_price: true
+          }
+        }
+      }
+    });
+
+    // Calculate total revenue
+    const totalRevenue = appointments.reduce((sum, appointment) => {
+      return sum + (appointment.service?.service_price || 0);
+    }, 0);
+
+    return res.status(200).json({
+      message: 'Revenue calculated successfully',
+      totalRevenue,
+      currency: 'Base currency units'
+    });
+
+  } catch (error) {
+    console.error('Error calculating revenue:', error);
+    return res.status(500).json({ message: 'Failed to calculate revenue' });
+  }
+};
+module.exports = {createAppointment , getAppointmentsBySalon , deleteAppointment , updateAppointment,getSalonRevenueLast30Days};
