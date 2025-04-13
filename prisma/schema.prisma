@@ -99,7 +99,7 @@ model Client {
   branch_id   String
   staff_id    String?
   appointments Appointment[]
-
+  createdAt DateTime @default(now())
   branch Branch @relation(fields: [branch_id], references: [id])
   staff  Staff? @relation(fields: [staff_id], references: [id])
 }
