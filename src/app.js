@@ -10,6 +10,7 @@ const salonRoutes = require("./routes/salonRoutes")
 const branchRoutes = require("./routes/branchRoutes")
 const sendEmailRoutes = require("./routes/sendEmailRoutes")
 const inventryRoutes = require("./routes/inventryRoutes")
+const appoiment = require("./routes/appoimentRoutes")
 const app = express();
 
 // Middlewares
@@ -35,6 +36,7 @@ app.use("/api/email",sendEmailRoutes);
 app.use("/api/salon",salonRoutes);
 app.use("/api/branch", branchRoutes);
 app.use("/api/inventry",inventryRoutes )
+app.use("/api/appoiment",appoiment)
 
 
 app.get("/", (req, res) => {

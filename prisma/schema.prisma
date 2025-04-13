@@ -8,28 +8,29 @@ datasource db {
 }
 
 model User {
-  id          String  @id @default(uuid())
+  id          String   @id @default(uuid())
   fullname    String
-  email       String  @unique
+  email       String   @unique
   contact     String
   password    String
   profile_img String?
-  salonId     String? // changed to String
+  salonId     String?
   step        Int?
-  salon       Salon?  @relation(fields: [salonId], references: [id])
+  salon       Salon?   @relation(fields: [salonId], references: [id])
   staff       Staff[]
 }
 
 model Staff {
-  id          String  @id @default(uuid())
+  id          String   @id @default(uuid())
   fullname    String
-  email       String  @unique
-  contact     String  @unique
+  email       String   @unique
+  contact     String   @unique
   password    String
   profile_img String?
   user_id     String
   branch_id   String
-  staff_id    String  @unique
+  staff_id    String   @unique
+  appointments Appointment[]
 
   user    User     @relation(fields: [user_id], references: [id])
   branch  Branch   @relation(fields: [branch_id], references: [id])
@@ -37,7 +38,7 @@ model Staff {
 }
 
 model Salon {
-  id             String  @id @default(uuid())
+  id             String   @id @default(uuid())
   salon_name     String
   salon_tag      String
   opening_time   String?
@@ -45,13 +46,14 @@ model Salon {
   contact_number String
   branch_url     String?
   salon_img_url  String?
+  appointments   Appointment[]
 
   branches Branch[]
   users    User[]
 }
 
 model Branch {
-  id              String      @id @default(uuid())
+  id              String        @id @default(uuid())
   branch_name     String
   branch_location String
   salon_id        String
@@ -59,11 +61,13 @@ model Branch {
   contact_number  String
   opning_time     String
   closeings_time  String
-  salon           Salon       @relation(fields: [salon_id], references: [id])
-  staff           Staff[]
-  inventory       Inventory[]
-  clients         Client[]
-  service         Service[]
+  appointments    Appointment[]
+
+  salon     Salon       @relation(fields: [salon_id], references: [id])
+  staff     Staff[]
+  inventory Inventory[]
+  clients   Client[]
+  service   Service[]
 }
 
 model Inventory {
@@ -77,22 +81,43 @@ model Inventory {
 }
 
 model Service {
-  id               String @id @default(uuid())
+  id               String   @id @default(uuid())
   service_name     String
   service_price   Int
   time            Int
   branch_id       String
+  appointments    Appointment[]
+
   branch Branch @relation(fields: [branch_id], references: [id])
 }
 
 model Client {
-  id          String  @id @default(uuid())
+  id          String   @id @default(uuid())
   client_name String
   email       String
   contact     String
   branch_id   String
   staff_id    String?
+  appointments Appointment[]
 
   branch Branch @relation(fields: [branch_id], references: [id])
   staff  Staff? @relation(fields: [staff_id], references: [id])
+}
+
+model Appointment {
+  id          String   @id @default(uuid())
+  salon_id    String
+  branch_id   String
+  staff_id    String
+  service_id  String
+  client_id   String
+  date        String
+  time        String
+  status      String?  @default("pending")
+
+  salon    Salon    @relation(fields: [salon_id], references: [id])
+  branch   Branch   @relation(fields: [branch_id], references: [id])
+  staff    Staff    @relation(fields: [staff_id], references: [id])
+  service  Service  @relation(fields: [service_id], references: [id])
+  client   Client   @relation(fields: [client_id], references: [id])
 }
