@@ -12,6 +12,7 @@ const sendEmailRoutes = require("./routes/sendEmailRoutes")
 const inventryRoutes = require("./routes/inventryRoutes")
 const appoiment = require("./routes/appoimentRoutes")
 const numbersRoutes = require("./routes/numberRoutes")
+const clientRoutes = require("./routes/clientRoutes")
 const app = express();
 
 // Middlewares
@@ -36,10 +37,10 @@ app.use("/api/staff",staffRoutes);
 app.use("/api/email",sendEmailRoutes);
 app.use("/api/salon",salonRoutes);
 app.use("/api/branch", branchRoutes);
-app.use("/api/inventry",inventryRoutes )
-app.use("/api/appoiment",appoiment)
-app.use("/api/number",numbersRoutes)
-
+app.use("/api/inventry",inventryRoutes);
+app.use("/api/appoiment",appoiment);
+app.use("/api/number",numbersRoutes);
+app.use("/api/clients",clientRoutes);
 
 app.get("/", (req, res) => {
   res.send("API is running...");
