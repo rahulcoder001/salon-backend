@@ -1,9 +1,11 @@
+const prisma = require("../config/db");
+
 const getDailyStatsLast30Days = async (req, res) => {
     const { salonId } = req.params;
     try {
       // Verify salon exists
       const salonExists = await prisma.salon.findUnique({
-        where: { id: salonId },
+        where: { id: salonId},
       });
   
       if (!salonExists) {

@@ -1,8 +1,5 @@
 const express = require("express");
 const { createAppointment, getAppointmentsBySalon, updateAppointment, deleteAppointment, getSalonRevenueLast30Days, getRecentAppointmentsCount } = require("../controllers/appoimentmaagement");
-
-
-
 const router = express.Router();
 
 router.post('/create', createAppointment);

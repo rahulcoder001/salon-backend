@@ -42,7 +42,7 @@ app.use("/api/inventry",inventryRoutes);
 app.use("/api/appoiment",appoiment);
 app.use("/api/number",numbersRoutes);
 app.use("/api/clients",clientRoutes);
-app.use("api/chart",charRoutes)
+app.use("/api/chart",charRoutes)
 
 app.get("/", (req, res) => {
   res.send("API is running...");
