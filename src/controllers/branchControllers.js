@@ -1,68 +1,121 @@
-const prisma = require("../config/db");
-
-// **Add Branch**
-const addBranch = async (req, res) => {
-  const { branch_name, branch_location, salon_id , contact_email,contact_number,opning_time,closeings_time} = req.body;
+const getDailyStatsLast30Days = async (req, res) => {
+  const { salonId } = req.params;
 
   try {
-    // Check if the salon exists
-    const existingSalon = await prisma.salon.findUnique({
-      where: { id: salon_id },
+    // Verify salon exists
+    const salonExists = await prisma.salon.findUnique({
+      where: { id: salonId },
     });
 
-    if (!existingSalon) {
-      return res.status(404).json({ message: "Salon not found" });
+    if (!salonExists) {
+      return res.status(404).json({ message: 'Salon not found' });
     }
 
-    // Create new branch
-    const newBranch = await prisma.branch.create({
-      data: {
-        branch_name,
-        branch_location,
-        salon_id,
-        contact_email,
-        contact_number,
-        opning_time,
-        closeings_time
+    // Calculate date range
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 30);
+
+    // 1. Get daily revenue (corrected query)
+    const revenueData = await prisma.appointment.findMany({
+      where: {
+        salon_id: salonId,
+        date: {
+          gte: startDate.toISOString(),
+          lte: endDate.toISOString(),
+        }
       },
-    });
-
-    res.status(201).json({ message: "Branch created successfully", branch: newBranch });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-
-
-
-const IsBranch = async (req, res) => {
-  const { salon_id } = req.body;
-
-  try {
-    const branches = await prisma.branch.findMany({
-      where: { salon_id: salon_id },
       include: {
-        staff: true,  // Directly include staff array
-        service: true, // Include services if needed
-        inventory: true // Include inventory if needed
+        service: {
+          select: {
+            service_price: true
+          }
+        }
       }
     });
 
-    return res.status(201).json({
-      isbranch: branches.length > 0,
-      branches: branches.map(branch => ({
-        ...branch,
-        staffCount: branch.staff.length, // Add count if needed
-        serviceCount: branch.service.length,
-        inventoryCount: branch.inventory.length
-      }))
+    // 2. Get daily new clients (corrected query)
+    const clientsData = await prisma.client.groupBy({
+      by: ['createdAt'],
+      where: {
+        branch: {
+          salon_id: salonId,
+        },
+        createdAt: {
+          gte: startDate,
+          lte: endDate,
+        }
+      },
+      _count: {
+        _all: true
+      },
     });
 
+    // 3. Get daily appointments (corrected query)
+    const appointmentsData = await prisma.appointment.groupBy({
+      by: ['date'],
+      where: {
+        salon_id: salonId,
+        date: {
+          gte: startDate.toISOString(),
+          lte: endDate.toISOString(),
+        }
+      },
+      _count: {
+        _all: true
+      },
+    });
+
+    // Process revenue data
+    const revenueByDate = revenueData.reduce((acc, appointment) => {
+      const date = new Date(appointment.date).toISOString().split('T')[0];
+      acc[date] = (acc[date] || 0) + (appointment.service?.service_price || 0);
+      return acc;
+    }, {});
+
+    // Create date map
+    const dateMap = new Map();
+    const currentDate = new Date(startDate);
+    
+    while (currentDate <= endDate) {
+      const dateKey = currentDate.toISOString().split('T')[0];
+      const formattedDay = `${currentDate.getDate()} ${currentDate.toLocaleString('default', { month: 'short' })}`;
+      
+      dateMap.set(dateKey, {
+        day: formattedDay,
+        revenue: revenueByDate[dateKey] || 0,
+        newClients: 0,
+        appointments: 0
+      });
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    // Populate client data
+    clientsData.forEach(({ createdAt, _count }) => {
+      const dateKey = new Date(createdAt).toISOString().split('T')[0];
+      if (dateMap.has(dateKey)) {
+        dateMap.get(dateKey).newClients = _count._all;
+      }
+    });
+
+    // Populate appointment data
+    appointmentsData.forEach(({ date, _count }) => {
+      const dateKey = new Date(date).toISOString().split('T')[0];
+      if (dateMap.has(dateKey)) {
+        dateMap.get(dateKey).appointments = _count._all;
+      }
+    });
+
+    // Convert to sorted array
+    const result = Array.from(dateMap.values()).sort((a, b) => 
+      new Date(a.day.split(' ').reverse().join('-')) - 
+      new Date(b.day.split(' ').reverse().join('-'))
+    );
+
+    return res.status(200).json(result);
+
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    console.error('Error fetching daily stats:', error);
+    return res.status(500).json({ message: 'Failed to retrieve daily stats' });
   }
 };
-
-module.exports = { addBranch , IsBranch };
