@@ -121,3 +121,5 @@ const getDailyStatsLast30Days = async (req, res) => {
     return res.status(500).json({ message: 'Failed to retrieve daily stats' });
   }
 };
+
+module.exports = {getDailyStatsLast30Days}
