@@ -233,4 +233,51 @@ const getSalonRevenueLast30Days = async (req, res) => {
     return res.status(500).json({ message: 'Failed to calculate revenue' });
   }
 };
-module.exports = {createAppointment , getAppointmentsBySalon , deleteAppointment , updateAppointment,getSalonRevenueLast30Days};
+
+
+const getRecentAppointmentsCount = async (req, res) => {
+  const { salonId } = req.params;
+
+  try {
+    // Verify salon exists
+    const salonExists = await prisma.salon.findUnique({
+      where: { id: salonId },
+    });
+
+    if (!salonExists) {
+      return res.status(404).json({ message: 'Salon not found' });
+    }
+
+    // Calculate date 30 days ago in YYYY-MM-DD format
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const formattedDate = thirtyDaysAgo.toISOString().split('T')[0];
+
+    // Count appointments for the salon in last 30 days
+    const totalAppointments = await prisma.appointment.count({
+      where: {
+        salon_id: salonId,
+        date: {
+          gte: formattedDate
+        }
+      }
+    });
+
+    return res.status(200).json({
+      message: 'Recent appointments count retrieved successfully',
+      totalAppointments
+    });
+
+  } catch (error) {
+    console.error('Error getting recent appointments count:', error);
+    return res.status(500).json({ message: 'Failed to retrieve appointments count' });
+  }
+};
+module.exports = {
+  createAppointment ,
+  getAppointmentsBySalon , 
+  deleteAppointment , 
+  updateAppointment,
+  getSalonRevenueLast30Days,
+  getRecentAppointmentsCount
+};

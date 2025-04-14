@@ -1,5 +1,5 @@
 const express = require("express");
-const { createAppointment, getAppointmentsBySalon, updateAppointment, deleteAppointment, getSalonRevenueLast30Days } = require("../controllers/appoimentmaagement");
+const { createAppointment, getAppointmentsBySalon, updateAppointment, deleteAppointment, getSalonRevenueLast30Days, getRecentAppointmentsCount } = require("../controllers/appoimentmaagement");
 
 
 
@@ -17,5 +17,6 @@ router.put('/:id', updateAppointment);
 router.delete('/:id', deleteAppointment);
 
 router.get("/totalprice/:salonId",getSalonRevenueLast30Days)
+router.get("/latestappointment/:salonId",getRecentAppointmentsCount)
  
 module.exports = router;
