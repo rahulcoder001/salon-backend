@@ -1,3 +1,5 @@
+const prisma = require("../config/db");
+
 const getDailyStatsLast30Days = async (req, res) => {
   const { salonId } = req.params;
 
