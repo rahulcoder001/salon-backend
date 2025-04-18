@@ -64,11 +64,11 @@ const getRecentClientsCount = async (req, res) => {
         if (!/^\d{10}$/.test(contact)) {
             return res.status(400).json({
                 success: false,
-                message: 'Invalid contact number (must be 10 digits)'
+                message: 'Contact number must be 10 digits'
             });
         }
 
-        // Validate salonId exists
+        // Validate salon exists
         const salonExists = await prisma.salon.findUnique({
             where: { id: salonId }
         });
@@ -80,24 +80,26 @@ const getRecentClientsCount = async (req, res) => {
             });
         }
 
-        // If staffId is provided, validate it belongs to the salon
+        // Validate staff only if provided
         if (staffId) {
-            const staffExists = await prisma.staff.findFirst({
+            const validStaff = await prisma.staff.findFirst({
                 where: {
                     id: staffId,
-                    salon_id: salonId
+                    branch: {
+                        salon_id: salonId
+                    }
                 }
             });
-
-            if (!staffExists) {
+            
+            if (!validStaff) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Staff member not found in this salon'
+                    message: 'Staff member does not belong to this salon'
                 });
             }
         }
 
-        // Check for existing client with same email or contact in the same salon
+        // Check for existing client in the same salon
         const existingClient = await prisma.client.findFirst({
             where: {
                 salon_id: salonId,
@@ -109,26 +111,25 @@ const getRecentClientsCount = async (req, res) => {
         });
 
         if (existingClient) {
-            const conflictField = existingClient.email === email ? 'email' : 'contact';
+            const conflictField = existingClient.email === email ? 'email' : 'contact number';
             return res.status(409).json({
                 success: false,
-                message: `Client with this ${conflictField} already exists in this salon`,
-                conflictField
+                message: `${conflictField} already exists in this salon`
             });
         }
 
-        // Create new client
+        // Create client
         const newClient = await prisma.client.create({
             data: {
                 client_name,
                 email: email || null,
                 contact,
-                staff_id: staffId || null,
-                salon_id: salonId
+                salon_id: salonId,
+                staff_id: staffId || null
             },
             include: {
-                staff: true,
-                salon: true
+                salon: true,
+                staff: true
             }
         });
 
@@ -140,14 +141,11 @@ const getRecentClientsCount = async (req, res) => {
 
     } catch (error) {
         console.error('Error adding client:', error);
-
-        // Handle Prisma errors
+        
         if (error.code === 'P2002') {
-            const conflictField = error.meta.target[0];
             return res.status(409).json({
                 success: false,
-                message: `Client with this ${conflictField} already exists`,
-                conflictField
+                message: 'Duplicate entry - client already exists'
             });
         }
 
