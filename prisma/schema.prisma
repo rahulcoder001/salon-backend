@@ -47,6 +47,7 @@ model Salon {
   branch_url     String?
   salon_img_url  String?
   appointments   Appointment[]
+  clients        Client[]
 
   branches Branch[]
   users    User[]
@@ -95,11 +96,13 @@ model Client {
   client_name String
   email       String
   contact     String
+  salon_id    String
   staff_id    String?
   appointments Appointment[]
   createdAt   DateTime @default(now())
 
-  staff  Staff? @relation(fields: [staff_id], references: [id])
+  salon  Salon   @relation(fields: [salon_id], references: [id])
+  staff  Staff?  @relation(fields: [staff_id], references: [id])
 }
 
 model Appointment {

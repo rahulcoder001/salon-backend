@@ -42,13 +42,13 @@ const getRecentClientsCount = async (req, res) => {
 
   const addClient = async (req, res) => {
     try {
-        const { client_name, email, contact, staffId } = req.body;
+        const { client_name, email, contact, staffId, salonId } = req.body;
 
         // Validate required fields
-        if (!client_name || !contact) {
+        if (!client_name || !contact || !salonId) {
             return res.status(400).json({
                 success: false,
-                message: 'Name and Contact are required fields'
+                message: 'Name, Contact, and Salon ID are required fields'
             });
         }
 
@@ -68,9 +68,39 @@ const getRecentClientsCount = async (req, res) => {
             });
         }
 
-        // Check for existing client with same email or contact
+        // Validate salonId exists
+        const salonExists = await prisma.salon.findUnique({
+            where: { id: salonId }
+        });
+
+        if (!salonExists) {
+            return res.status(404).json({
+                success: false,
+                message: 'Salon not found'
+            });
+        }
+
+        // If staffId is provided, validate it belongs to the salon
+        if (staffId) {
+            const staffExists = await prisma.staff.findFirst({
+                where: {
+                    id: staffId,
+                    salon_id: salonId
+                }
+            });
+
+            if (!staffExists) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Staff member not found in this salon'
+                });
+            }
+        }
+
+        // Check for existing client with same email or contact in the same salon
         const existingClient = await prisma.client.findFirst({
             where: {
+                salon_id: salonId,
                 OR: [
                     { email: email || undefined },
                     { contact }
@@ -82,7 +112,7 @@ const getRecentClientsCount = async (req, res) => {
             const conflictField = existingClient.email === email ? 'email' : 'contact';
             return res.status(409).json({
                 success: false,
-                message: `Client with this ${conflictField} already exists`,
+                message: `Client with this ${conflictField} already exists in this salon`,
                 conflictField
             });
         }
@@ -93,10 +123,12 @@ const getRecentClientsCount = async (req, res) => {
                 client_name,
                 email: email || null,
                 contact,
-                staff_id: staffId || null
+                staff_id: staffId || null,
+                salon_id: salonId
             },
             include: {
-                staff: true
+                staff: true,
+                salon: true
             }
         });
 
