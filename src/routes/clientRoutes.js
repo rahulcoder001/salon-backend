@@ -5,5 +5,5 @@ const { getRecentClientsCount, addClient } = require("../controllers/clientscont
 const router = express.Router();
 
 router.get("/totalclients/:salonId",getRecentClientsCount);
-router.get("/addclients/:salonId",addClient);
+router.post("/addclients",addClient);
 module.exports = router;
