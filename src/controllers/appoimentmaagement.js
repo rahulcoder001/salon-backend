@@ -273,6 +273,8 @@ const getRecentAppointmentsCount = async (req, res) => {
     return res.status(500).json({ message: 'Failed to retrieve appointments count' });
   }
 };
+
+
 module.exports = {
   createAppointment ,
   getAppointmentsBySalon , 
