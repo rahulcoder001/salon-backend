@@ -66,7 +66,6 @@ model Branch {
   salon     Salon       @relation(fields: [salon_id], references: [id])
   staff     Staff[]
   inventory Inventory[]
-  clients   Client[]
   service   Service[]
 }
 
@@ -83,10 +82,10 @@ model Inventory {
 model Service {
   id               String   @id @default(uuid())
   service_name     String
-  service_price   Int
-  time            Int
-  branch_id       String
-  appointments    Appointment[]
+  service_price    Int
+  time             Int
+  branch_id        String
+  appointments     Appointment[]
 
   branch Branch @relation(fields: [branch_id], references: [id])
 }
@@ -96,11 +95,10 @@ model Client {
   client_name String
   email       String
   contact     String
-  branch_id   String
   staff_id    String?
   appointments Appointment[]
-  createdAt DateTime @default(now())
-  branch Branch @relation(fields: [branch_id], references: [id])
+  createdAt   DateTime @default(now())
+
   staff  Staff? @relation(fields: [staff_id], references: [id])
 }
 
