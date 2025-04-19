@@ -18,7 +18,7 @@ const getDailyStatsLast30Days = async (req, res) => {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - 30);
 
-    // 1. Get daily revenue (corrected query)
+    // 1. Get daily revenue
     const revenueData = await prisma.appointment.findMany({
       where: {
         salon_id: salonId,
@@ -36,13 +36,11 @@ const getDailyStatsLast30Days = async (req, res) => {
       }
     });
 
-    // 2. Get daily new clients (corrected query)
+    // 2. Get daily new clients (fixed query)
     const clientsData = await prisma.client.groupBy({
       by: ['createdAt'],
       where: {
-        branch: {
-          salon_id: salonId,
-        },
+        salon_id: salonId,
         createdAt: {
           gte: startDate,
           lte: endDate,
@@ -53,7 +51,7 @@ const getDailyStatsLast30Days = async (req, res) => {
       },
     });
 
-    // 3. Get daily appointments (corrected query)
+    // 3. Get daily appointments
     const appointmentsData = await prisma.appointment.groupBy({
       by: ['date'],
       where: {
@@ -109,8 +107,8 @@ const getDailyStatsLast30Days = async (req, res) => {
     });
 
     // Convert to sorted array
-    const result = Array.from(dateMap.values()).sort((a, b) => 
-      new Date(a.day.split(' ').reverse().join('-')) - 
+    const result = Array.from(dateMap.values()).sort((a, b) =>
+      new Date(a.day.split(' ').reverse().join('-')) -
       new Date(b.day.split(' ').reverse().join('-'))
     );
 
@@ -121,6 +119,7 @@ const getDailyStatsLast30Days = async (req, res) => {
     return res.status(500).json({ message: 'Failed to retrieve daily stats' });
   }
 };
+
 
 module.exports = {getDailyStatsLast30Days}
 
