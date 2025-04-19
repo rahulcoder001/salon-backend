@@ -80,7 +80,43 @@ const getRecentClientsCount = async (req, res) => {
     }
   };
   
+  const getClientsBySalon = async (req, res) => {
+    const { salon_id } = req.params;
+  
+    if (!salon_id) {
+      return res.status(400).json({ success: false, message: "salon_id is required" });
+    }
+  
+    try {
+      const clients = await prisma.client.findMany({
+        where: {
+          salon_id
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        include: {
+          appointments: true,
+          staff: true,
+          salon: true
+        }
+      });
+  
+      res.status(200).json({
+        success: true,
+        total: clients.length,
+        clients
+      });
+  
+    } catch (error) {
+      console.error("Error fetching clients:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching clients for this salon",
+        error: error.message
+      });
+    }
+  };
 
 
-
-module.exports={getRecentClientsCount,addClient}
+  module.exports={getRecentClientsCount,addClient , getClientsBySalon}
