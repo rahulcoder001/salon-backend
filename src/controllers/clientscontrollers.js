@@ -118,5 +118,44 @@ const getRecentClientsCount = async (req, res) => {
     }
   };
 
+  const updateClient = async (req, res) => {
+    const { id } = req.params;
+    const { client_name, email, contact } = req.body;
+  
+    if (!id || !client_name || !email || !contact) {
+      return res.status(400).json({ success: false, message: "All fields are required" });
+    }
+  
+    try {
+      const updatedClient = await prisma.client.update({
+        where: { id },
+        data: {
+          client_name,
+          email,
+          contact
+        }
+      });
+  
+      res.status(200).json({ success: true, message: "Client updated", client: updatedClient });
+    } catch (error) {
+      console.error("Error updating client:", error);
+      res.status(500).json({ success: false, message: "Error updating client", error: error.message });
+    }
+  };
+  const deleteClient = async (req, res) => {
+    const { id } = req.params;
+  
+    try {
+      await prisma.client.delete({
+        where: { id }
+      });
+  
+      res.status(200).json({ success: true, message: "Client deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting client:", error);
+      res.status(500).json({ success: false, message: "Error deleting client", error: error.message });
+    }
+  };
+    
 
-  module.exports={getRecentClientsCount,addClient , getClientsBySalon}
+  module.exports={getRecentClientsCount,addClient , getClientsBySalon,updateClient,deleteClient}
