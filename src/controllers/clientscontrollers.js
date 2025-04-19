@@ -96,7 +96,11 @@ const getRecentClientsCount = async (req, res) => {
           createdAt: 'desc'
         },
         include: {
-          appointments: true,
+          appointments: {
+            include: {
+              service: true  // Include service details for each appointment
+            }
+          },
           staff: true,
           salon: true
         }
@@ -117,6 +121,7 @@ const getRecentClientsCount = async (req, res) => {
       });
     }
   };
+  
 
   const updateClient = async (req, res) => {
     const { id } = req.params;
