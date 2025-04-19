@@ -20,10 +20,12 @@ const app = express();
 app.use(express.json());
 // CORS Configuration
 const corsOptions = {
-  origin: "*",
+  origin: (origin, callback) => {
+    callback(null, true); // Allow all origins
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: false,
+  credentials: true, // if you're using cookies or auth headers
 };
 
 app.use(cors(corsOptions));
