@@ -158,4 +158,4 @@ const getRecentClientsCount = async (req, res) => {
 };
 
 
-  module.exports={getRecentClientsCount,addClient}
+module.exports={getRecentClientsCount,addClient}
