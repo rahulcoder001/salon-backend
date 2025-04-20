@@ -56,7 +56,6 @@ const IsBranch = async (req, res) => {
             staff:true,
             appointment: {
                include:{
-                staff:true,
                 service:true,
                 client:true
                }
