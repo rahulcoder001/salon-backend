@@ -8,6 +8,8 @@ const getRecentClientsCount = async (req, res) => {
       const salonExists = await prisma.salon.findUnique({
         where: { id: salonId },
       });
+
+      
   
       if (!salonExists) {
         return res.status(404).json({ message: 'Salon not found' });
