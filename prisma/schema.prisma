@@ -31,10 +31,12 @@ model Staff {
   branch_id   String
   staff_id    String   @unique
   appointments Appointment[]
+  salaries    Salary[]
+  attendances Attendance[]
+  clients     Client[]
 
   user    User     @relation(fields: [user_id], references: [id])
   branch  Branch   @relation(fields: [branch_id], references: [id])
-  clients Client[]
 }
 
 model Salon {
@@ -121,4 +123,20 @@ model Appointment {
   staff    Staff    @relation(fields: [staff_id], references: [id])
   service  Service  @relation(fields: [service_id], references: [id])
   client   Client   @relation(fields: [client_id], references: [id])
+}
+
+model Salary {
+  id       String   @id @default(uuid())
+  staff_id String
+  amount   Int
+  date     DateTime @default(now()) // Or use String if you prefer custom date formats
+  staff    Staff    @relation(fields: [staff_id], references: [id])
+}
+
+model Attendance {
+  id         String   @id @default(uuid())
+  staff_id   String
+  date       DateTime @default(now()) // Date of attendance
+  login_time String   // Store time as string (e.g., "09:30 AM")
+  staff      Staff    @relation(fields: [staff_id], references: [id])
 }
