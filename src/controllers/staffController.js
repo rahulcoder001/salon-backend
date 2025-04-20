@@ -165,7 +165,7 @@ const getStaffById = async (req, res) => {
 
 
 const  addSalary = async(req, res)=> {
-  const { staff_id, amount } = req.body;
+  const { staff_id, amount, date } = req.body;
 
   // Validate required fields
   if (!staff_id || !amount) {
@@ -192,7 +192,7 @@ const  addSalary = async(req, res)=> {
       data: {
         staff_id: staff_id,
         amount: amount,
-        date: new Date(), // Use provided date or current date
+        date: date ? new Date(date) : new Date(), // Use provided date or current date
       },
       include: {
         staff: true, // Include staff details in response if needed

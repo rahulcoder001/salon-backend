@@ -6,5 +6,5 @@ const router = express.Router();
 router.post("/login", staffLogin);
 router.post("/signup",staffSignup)
 router.get("/getstaff/:id",getStaffById)
-router.post("/addsallary", addSalary)''
+router.post("/addsallary", addSalary)
 module.exports = router;
