@@ -68,7 +68,7 @@ const staffLogin = async (req, res) => {
 };
 
 
-export const getStaffById = async (req, res) => {
+const getStaffById = async (req, res) => {
   try {
     const { id } = req.params;
 
