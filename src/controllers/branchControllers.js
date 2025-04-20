@@ -50,7 +50,19 @@ const IsBranch = async (req, res) => {
           }
         },
         service: true,
-        inventory: true
+        inventory: true,
+        usedProducts:{
+           include:{
+            staff:true,
+            appointment: {
+               include:{
+                staff:true,
+                service:true,
+                client:true
+               }
+            }
+           }
+        }
       }
     });
 

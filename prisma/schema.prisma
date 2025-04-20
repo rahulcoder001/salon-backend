@@ -21,19 +21,20 @@ model User {
 }
 
 model Staff {
-  id          String   @id @default(uuid())
+  id          String     @id @default(uuid())
   fullname    String
-  email       String   @unique
-  contact     String   @unique
+  email       String     @unique
+  contact     String     @unique
   password    String
   profile_img String?
   user_id     String
   branch_id   String
-  staff_id    String   @unique
+  staff_id    String     @unique
   appointments Appointment[]
   salaries    Salary[]
   attendances Attendance[]
   clients     Client[]
+  usedProducts UsedProduct[]
 
   user    User     @relation(fields: [user_id], references: [id])
   branch  Branch   @relation(fields: [branch_id], references: [id])
@@ -65,6 +66,7 @@ model Branch {
   opning_time     String
   closeings_time  String
   appointments    Appointment[]
+  usedProducts    UsedProduct[]
 
   salon     Salon       @relation(fields: [salon_id], references: [id])
   staff     Staff[]
@@ -117,6 +119,7 @@ model Appointment {
   date        String
   time        String
   status      String?  @default("pending")
+  usedProducts UsedProduct[]
 
   salon    Salon    @relation(fields: [salon_id], references: [id])
   branch   Branch   @relation(fields: [branch_id], references: [id])
@@ -129,14 +132,28 @@ model Salary {
   id       String   @id @default(uuid())
   staff_id String
   amount   Int
-  date     DateTime @default(now()) // Or use String if you prefer custom date formats
+  date     DateTime @default(now())
   staff    Staff    @relation(fields: [staff_id], references: [id])
 }
 
 model Attendance {
   id         String   @id @default(uuid())
   staff_id   String
-  date       DateTime @default(now()) // Date of attendance
-  login_time String   // Store time as string (e.g., "09:30 AM")
+  date       DateTime @default(now())
+  login_time String
   staff      Staff    @relation(fields: [staff_id], references: [id])
+}
+
+model UsedProduct {
+  id             String     @id @default(uuid())
+  branch_id      String
+  product_name   String
+  price          Int
+  staff_id       String
+  appointment_id String
+  date           DateTime   @default(now())
+
+  branch      Branch     @relation(fields: [branch_id], references: [id])
+  staff       Staff      @relation(fields: [staff_id], references: [id])
+  appointment Appointment @relation(fields: [appointment_id], references: [id])
 }
