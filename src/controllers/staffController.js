@@ -161,4 +161,51 @@ const getStaffById = async (req, res) => {
     });
   }
 };
-module.exports = { staffLogin , staffSignup ,getStaffById };
+
+
+
+const  addSalary = async(req, res)=> {
+  const { staff_id, amount } = req.body;
+
+  // Validate required fields
+  if (!staff_id || !amount) {
+    return res.status(400).json({ error: 'staff_id and amount are required' });
+  }
+
+  // Validate amount type
+  if (typeof amount !== 'number' || amount <= 0 || !Number.isInteger(amount)) {
+    return res.status(400).json({ error: 'Amount must be a positive integer' });
+  }
+
+  try {
+    // Check if staff exists
+    const staffExists = await prisma.staff.findUnique({
+      where: { id: staff_id },
+    });
+
+    if (!staffExists) {
+      return res.status(404).json({ error: 'Staff member not found' });
+    }
+
+    // Create new salary record
+    const newSalary = await prisma.salary.create({
+      data: {
+        staff_id: staff_id,
+        amount: amount,
+        date: new Date(), // Use provided date or current date
+      },
+      include: {
+        staff: true, // Include staff details in response if needed
+      },
+    });
+
+    return res.status(201).json({
+      message: 'Salary added successfully',
+      salary: newSalary,
+    });
+  } catch (error) {
+    console.error('Error adding salary:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}
+module.exports = { staffLogin , staffSignup ,getStaffById,addSalary };
