@@ -1,13 +1,13 @@
 const prisma = require("../config/db");
+const { startOfDay, endOfDay, format } = require("date-fns");
 
 const getFinancialData = async (req, res) => {
   try {
     const { salonId, startDate, endDate } = req.body;
-    
-    const start = new Date(startDate);
-    const end = new Date(endDate);
 
-    // Get all branches for the salon
+    const start = format(new Date(startDate), "yyyy-MM-dd");
+    const end = format(new Date(endDate), "yyyy-MM-dd");
+
     const branches = await prisma.branch.findMany({
       where: { salon_id: salonId },
       include: {
@@ -16,8 +16,8 @@ const getFinancialData = async (req, res) => {
             salaries: {
               where: {
                 date: {
-                  gte: startOfDay(start),
-                  lte: endOfDay(end)
+                  gte: startOfDay(new Date(startDate)),
+                  lte: endOfDay(new Date(endDate))
                 }
               }
             }
@@ -26,8 +26,8 @@ const getFinancialData = async (req, res) => {
         appointments: {
           where: {
             date: {
-              gte: start.toISOString(),
-              lte: end.toISOString()
+              gte: start,
+              lte: end
             }
           },
           include: {
@@ -38,8 +38,8 @@ const getFinancialData = async (req, res) => {
         usedProducts: {
           where: {
             date: {
-              gte: startOfDay(start),
-              lte: endOfDay(end)
+              gte: startOfDay(new Date(startDate)),
+              lte: endOfDay(new Date(endDate))
             }
           }
         }
@@ -47,16 +47,22 @@ const getFinancialData = async (req, res) => {
     });
 
     const financialData = branches.map(branch => {
-      // Calculate earnings from appointments
-      const earnings = branch.appointments.reduce((sum, appointment) => 
-        sum + (appointment.service?.service_price || 0), 0);
+      const earnings = branch.appointments.reduce(
+        (sum, appointment) => sum + (appointment.service?.service_price || 0),
+        0
+      );
 
-      // Calculate staff salaries
-      const staffSalaries = branch.staff.reduce((sum, staff) => 
-        sum + staff.salaries.reduce((s, salary) => s + salary.amount, 0), 0);
+      const staffSalaries = branch.staff.reduce(
+        (sum, staff) =>
+          sum +
+          staff.salaries.reduce((s, salary) => s + salary.amount, 0),
+        0
+      );
 
-      // Calculate product costs
-      const productCosts = branch.usedProducts.reduce((sum, product) => sum + product.price, 0);
+      const productCosts = branch.usedProducts.reduce(
+        (sum, product) => sum + product.price,
+        0
+      );
 
       return {
         branchId: branch.id,
@@ -70,11 +76,17 @@ const getFinancialData = async (req, res) => {
       };
     });
 
-    // Calculate totals
-    const totalEarnings = financialData.reduce((sum, data) => sum + data.earnings, 0);
-    const totalSalaries = financialData.reduce((sum, data) => sum + data.staffSalaries, 0);
-    const totalProductCosts = financialData.reduce((sum, data) => sum + data.productCosts, 0);
+    const totalEarnings = financialData.reduce((sum, d) => sum + d.earnings, 0);
+    const totalSalaries = financialData.reduce((sum, d) => sum + d.staffSalaries, 0);
+    const totalProductCosts = financialData.reduce((sum, d) => sum + d.productCosts, 0);
     const totalNetProfit = totalEarnings - totalSalaries - totalProductCosts;
+
+    const trendData = financialData.flatMap(data =>
+      data.appointments.map(app => ({
+        date: app.date,
+        amount: app.service?.service_price || 0
+      }))
+    );
 
     res.status(200).json({
       success: true,
@@ -86,19 +98,13 @@ const getFinancialData = async (req, res) => {
           productCosts: totalProductCosts,
           netProfit: totalNetProfit
         },
-        trendData: financialData.flatMap(data => 
-          data.appointments.map(appointment => ({
-            date: appointment.date,
-            amount: appointment.service?.service_price || 0
-          }))
-        )
+        trendData
       }
     });
-
   } catch (error) {
-    console.error('Error fetching financial data:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error("Error in getFinancialData:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
-module.exports = {getFinancialData}
+module.exports = { getFinancialData };
