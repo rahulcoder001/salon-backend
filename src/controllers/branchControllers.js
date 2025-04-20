@@ -43,19 +43,31 @@ const IsBranch = async (req, res) => {
     const branches = await prisma.branch.findMany({
       where: { salon_id: salon_id },
       include: {
-        staff: true,  // Directly include staff array
-        service: true, // Include services if needed
-        inventory: true // Include inventory if needed
+        staff: {
+          include: {
+            salaries: true,    // Include salary records
+            attendances: true // Include attendance records
+          }
+        },
+        service: true,
+        inventory: true
       }
     });
 
-    return res.status(201).json({
+    return res.status(200).json({
       isbranch: branches.length > 0,
       branches: branches.map(branch => ({
         ...branch,
-        staffCount: branch.staff.length, // Add count if needed
+        staffCount: branch.staff.length,
         serviceCount: branch.service.length,
-        inventoryCount: branch.inventory.length
+        inventoryCount: branch.inventory.length,
+        staff: branch.staff.map(staffMember => ({
+          ...staffMember,
+          salaries: staffMember.salaries,
+          attendances: staffMember.attendances,
+          salaryCount: staffMember.salaries.length,
+          attendanceCount: staffMember.attendances.length
+        }))
       }))
     });
 
