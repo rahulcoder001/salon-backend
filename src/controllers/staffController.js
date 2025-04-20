@@ -138,6 +138,7 @@ const getStaffById = async (req, res) => {
         time: appointment.time,
         status: appointment.status,
         service: appointment.service.service_name,
+        service_price:appointment.service.service_price,
         client: appointment.client.client_name
       })),
       clients: staff.clients.map(client => ({
