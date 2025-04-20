@@ -48,4 +48,64 @@ const saveService = async (req, res) => {
   }
 };
 
-module.exports = { SaveProduct, saveService };
+
+const DeleteProduct = async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({ message: "Inventory ID is required" });
+  }
+
+  try {
+    await prisma.inventory.delete({
+      where: { id: id },
+    });
+
+    return res.status(200).json({ message: "Inventory deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    
+    if (error.code === 'P2025') {
+      return res.status(404).json({ message: "Inventory not found" });
+    }
+    res.status(500).json({ message: "Failed to delete inventory" });
+  }
+};
+
+const UpdateProduct = async (req, res) => {
+  const { id } = req.params;
+  let updateData = req.body;
+
+  if (!id) {
+    return res.status(400).json({ message: "Inventory ID is required" });
+  }
+
+  try {
+    // Convert numerical fields if they exist in the request
+    if (updateData.product_quantity) {
+      updateData.product_quantity = parseInt(updateData.product_quantity);
+    }
+    if (updateData.price) {
+      updateData.price = parseInt(updateData.price);
+    }
+
+    const updatedInventory = await prisma.inventory.update({
+      where: { id: id },
+      data: updateData
+    });
+
+    return res.status(200).json({ 
+      message: "Inventory updated successfully", 
+      inventory: updatedInventory 
+    });
+  } catch (error) {
+    console.error(error);
+    
+    if (error.code === 'P2025') {
+      return res.status(404).json({ message: "Inventory not found" });
+    }
+    res.status(500).json({ message: "Failed to update inventory" });
+  }
+};
+
+module.exports = { SaveProduct, saveService,DeleteProduct,UpdateProduct };
