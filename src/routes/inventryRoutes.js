@@ -1,5 +1,5 @@
 const express = require("express");
-const { SaveProduct, saveService, UpdateProduct, DeleteProduct } = require("../controllers/inventryControllers");
+const { SaveProduct, saveService, UpdateProduct, DeleteProduct, updateService } = require("../controllers/inventryControllers");
 
 
 
@@ -9,6 +9,7 @@ router.post("/saveproduct", SaveProduct);
 router.post("/saveservice",saveService)
 router.put("/updateproduct/:id",UpdateProduct)
 router.delete("/deleteproduct/:id",DeleteProduct)
+router.put('/updateservices/:id', updateService);
 
 
  

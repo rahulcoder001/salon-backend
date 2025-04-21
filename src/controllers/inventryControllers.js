@@ -48,6 +48,41 @@ const saveService = async (req, res) => {
   }
 };
 
+const updateService = async (req, res) => {
+  const { id } = req.params; // Get service ID from URL params
+  let { service_name, service_price, time, branch_id } = req.body;
+
+  try {
+    // Convert to numbers
+    service_price = parseInt(service_price);
+    time = parseInt(time);
+
+    const updatedService = await prisma.service.update({
+      where: { id },
+      data: {
+        service_name,
+        service_price,
+        time,
+        branch_id,
+      },
+    });
+
+    return res.status(200).json({ 
+      message: "Service updated successfully", 
+      service: updatedService 
+    });
+  } catch (error) {
+    console.error(error);
+    
+    if (error.code === 'P2025') {
+      // Prisma record not found error
+      return res.status(404).json({ message: "Service not found" });
+    }
+    
+    res.status(500).json({ message: "Failed to update service" });
+  }
+};
+
 
 const DeleteProduct = async (req, res) => {
   const { id } = req.params;
@@ -108,4 +143,4 @@ const UpdateProduct = async (req, res) => {
   }
 };
 
-module.exports = { SaveProduct, saveService,DeleteProduct,UpdateProduct };
+module.exports = { SaveProduct, saveService,DeleteProduct,UpdateProduct,updateService };
