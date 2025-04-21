@@ -1,9 +1,5 @@
 const prisma = require("../config/db");
 
-
-
-
-
 const IsBranch = async (req, res) => {
   const { salon_id } = req.body;
 
