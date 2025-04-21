@@ -1,9 +1,5 @@
 const prisma = require("../config/db");
 
-
-
-
-
 const IsBranch = async (req, res) => {
   const { salon_id } = req.body;
 
@@ -24,7 +20,6 @@ const IsBranch = async (req, res) => {
             staff:true,
             appointment: {
                include:{
-                staff:true,
                 service:true,
                 client:true
                }
@@ -92,14 +87,32 @@ const addbrnch = async (req, res) => {
 };
 
 // Update Branch
-const updatebranch =  async (req, res) => {
+const updatebranch = async (req, res) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
+    const { 
+      branch_name,
+      branch_location,
+      contact_email,
+      contact_number,
+      opning_time,
+      closeings_time
+    } = req.body;
+
+    if (!branch_name || !branch_location || !contact_email || !contact_number) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
 
     const updatedBranch = await prisma.branch.update({
       where: { id },
-      data: updateData
+      data: {
+        branch_name,
+        branch_location,
+        contact_email,
+        contact_number,
+        opning_time: opning_time || "09:00",
+        closeings_time: closeings_time || "18:00"
+      }
     });
 
     res.json(updatedBranch);

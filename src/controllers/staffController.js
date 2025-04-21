@@ -11,17 +11,25 @@ const staffSignup = async (req, res) => {
   const { fullname, contact, email, password, profile_img, user_id, staff_id, branch_id } = req.body;
 
   try {
-    // Check if email already exists
+    // Check for existing email
     const existingEmail = await prisma.staff.findUnique({ where: { email } });
-    if (existingEmail) {
-      return res.status(400).json({ message: "Email already in use" });
-    }
+    if (existingEmail) return res.status(400).json({ message: "Email already in use" });
 
-    // Check if staff_id already exists
+    // Check for existing contact
+    const existingContact = await prisma.staff.findUnique({ where: { contact } });
+    if (existingContact) return res.status(400).json({ message: "Contact number already in use" });
+
+    // Check for existing staff_id
     const existingStaffId = await prisma.staff.findUnique({ where: { staff_id } });
-    if (existingStaffId) {
-      return res.status(400).json({ message: "Staff ID already in use" });
-    }
+    if (existingStaffId) return res.status(400).json({ message: "Staff ID already in use" });
+
+    // Validate user exists
+    const userExists = await prisma.user.findUnique({ where: { id: user_id } });
+    if (!userExists) return res.status(400).json({ message: "Invalid user ID" });
+
+    // Validate branch exists
+    const branchExists = await prisma.branch.findUnique({ where: { id: branch_id } });
+    if (!branchExists) return res.status(400).json({ message: "Invalid branch ID" });
 
     // Create staff member
     const newStaff = await prisma.staff.create({
@@ -29,7 +37,7 @@ const staffSignup = async (req, res) => {
         fullname,
         contact,
         email,
-        password,
+        password: await bcrypt.hash(password, 10), // Always hash passwords
         profile_img,
         user_id,
         staff_id,
@@ -37,12 +45,11 @@ const staffSignup = async (req, res) => {
       },
     });
 
-    // Generate JWT token
     const token = generateToken(newStaff.id, "staff");
-
     res.status(201).json({ message: "Staff registered successfully", token, staff: newStaff });
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    console.error(error); // Log the error for debugging
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
