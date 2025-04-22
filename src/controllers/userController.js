@@ -123,9 +123,80 @@ const getUserById = async (req, res) => {
   }
 };
 
+const updateUser = async (req, res) => {
+  const { user_id } = req.params;
+  const { fullname, contact, email, profile_img, step, salonId, password } = req.body;
+
+  try {
+    // Check if user exists
+    const existingUser = await prisma.user.findUnique({ 
+      where: { id: user_id } 
+    });
+    
+    if (!existingUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Validate email uniqueness if changing email
+    if (email && email !== existingUser.email) {
+      const emailUser = await prisma.user.findUnique({ 
+        where: { email } 
+      });
+      if (emailUser) {
+        return res.status(400).json({ message: "Email already in use" });
+      }
+    }
+
+    // Prepare update data
+    const updateData = {
+      fullname,
+      contact,
+      email,
+      profile_img,
+      step,
+      salonId
+    };
+
+    // Handle password update securely
+    if (password) {
+      updateData.password = await bcrypt.hash(password, 10);
+    }
+
+    // Perform the update
+    const updatedUser = await prisma.user.update({
+      where: { id: user_id },
+      data: updateData,
+      select: {
+        id: true,
+        fullname: true,
+        email: true,
+        contact: true,
+        profile_img: true,
+        salonId: true,
+        step: true,
+      },
+    });
+
+    res.status(200).json({
+      message: "User updated successfully",
+      user: updatedUser
+    });
+
+  } catch (error) {
+    console.error("Update User Error:", error);
+    res.status(500).json({ 
+      message: "Server error during update",
+      error: error.message 
+    });
+  }
+};
+
+
+
 module.exports = {
   userSignup,
   userLogin,
   changePassword,
-  getUserById, // ✅ export new function
+  getUserById, 
+   updateUser
 };
