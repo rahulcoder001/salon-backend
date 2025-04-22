@@ -15,6 +15,7 @@ const numbersRoutes = require("./routes/numberRoutes")
 const clientRoutes = require("./routes/clientRoutes")
 const charRoutes = require("./routes/chartRoutes")
 const financeRoutes=require("./routes/financialRoutes")
+const feedbackRoutes=require("./routes/feedbackRoutes")
 const app = express();
 
 // Middlewares
@@ -47,6 +48,8 @@ app.use("/api/number",numbersRoutes);
 app.use("/api/clients",clientRoutes);
 app.use("/api/chart",charRoutes);
 app.use("/api/finance",financeRoutes);
+app.use("/api/feedback",feedbackRoutes);
+
 
 app.get("/", (req, res) => {
   res.send("API is running...");
