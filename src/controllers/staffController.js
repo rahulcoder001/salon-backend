@@ -56,23 +56,62 @@ const staffSignup = async (req, res) => {
 
 // **Staff Login**
 const staffLogin = async (req, res) => {
-  const { email, password } = req.body;
+  const generateToken = (userId, role, expiresIn) => {
+    return jwt.sign(
+      { userId, role },
+      process.env.JWT_SECRET,
+      { expiresIn: `${expiresIn}s` }
+    );
+  };
+  const { staffId, password } = req.body;
 
   try {
-    const staff = await prisma.staff.findUnique({ where: { email } });
+    // Get staff with branch information
+    const staff = await prisma.staff.findUnique({
+      where: { staff_id: staffId },
+      include: { branch: true }
+    });
 
     if (!staff) return res.status(404).json({ message: "Staff not found" });
 
-    const isMatch = await bcrypt.compare(password, staff.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+    // Password check (consider using bcrypt in real-world scenario)
+    if (staff.password !== password) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
 
-    const token = generateToken(staff.id, "staff");
+    // Parse opening time from branch
+    const [openingHour, openingMinute] = staff.branch.opning_time.split(':').map(Number);
+    
+    // Calculate expiration time
+    const now = new Date();
+    const todayOpening = new Date(now);
+    todayOpening.setHours(openingHour, openingMinute, 0, 0);
 
-    res.status(200).json({ message: "Login successful", token, staff });
+    let expirationTime = new Date(todayOpening);
+    if (now >= todayOpening) {
+      expirationTime.setDate(expirationTime.getDate() + 1);
+    }
+
+    // Calculate token duration in seconds
+    const expiresIn = Math.floor((expirationTime - now) / 1000);
+
+    // Generate token with expiration
+    const token = generateToken(staff.id, "staff", expiresIn);
+
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      staff,
+      expirationTime: expirationTime.toISOString()
+    });
   } catch (error) {
+    console.error("Login error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
+
+// Updated token generator (example using jsonwebtoken)
+
 
 
 const getStaffById = async (req, res) => {
