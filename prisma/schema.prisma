@@ -35,11 +35,7 @@ model Staff {
   attendances  Attendance[]
   clients      Client[]
   usedProducts UsedProduct[]
-<<<<<<< HEAD
-  feedbacks   Feedback[]
-=======
   feedbacks    Feedback[]
->>>>>>> 16c42e7c18c2d035b393ddc0330b70bba5bbab8b
 
   user   User   @relation(fields: [user_id], references: [id])
   branch Branch @relation(fields: [branch_id], references: [id])
@@ -109,13 +105,8 @@ model Client {
   salon_id     String
   staff_id     String?
   appointments Appointment[]
-<<<<<<< HEAD
-  feedbacks   Feedback[]
-  createdAt   DateTime @default(now())
-=======
   feedbacks    Feedback[]
   createdAt    DateTime      @default(now())
->>>>>>> 16c42e7c18c2d035b393ddc0330b70bba5bbab8b
 
   salon Salon  @relation(fields: [salon_id], references: [id])
   staff Staff? @relation(fields: [staff_id], references: [id])
@@ -171,21 +162,6 @@ model UsedProduct {
 }
 
 model Feedback {
-<<<<<<< HEAD
-  id         String   @id @default(uuid())
-  client_id  String
-  branch_id  String
-  staff_id   String
-  date       DateTime @default(now())
-  rating     Int
-  review     String
-  feature    Boolean  @default(false)
-
-  client  Client  @relation(fields: [client_id], references: [id])
-  branch  Branch  @relation(fields: [branch_id], references: [id])
-  staff   Staff   @relation(fields: [staff_id], references: [id])
-}
-=======
   id        String   @id @default(uuid())
   client_id String
   branch_id String
@@ -199,4 +175,3 @@ model Feedback {
   branch Branch @relation(fields: [branch_id], references: [id])
   staff  Staff  @relation(fields: [staff_id], references: [id])
 }
->>>>>>> 16c42e7c18c2d035b393ddc0330b70bba5bbab8b
