@@ -58,7 +58,7 @@ const staffSignup = async (req, res) => {
 
 // **Staff Login**
 const staffLogin = async (req, res) => {
-  
+
   const { staffId, password } = req.body;
 
   try {
@@ -255,16 +255,27 @@ const getStaffByIdatnav = async (req, res) => {
   const { id } = req.params;
   try {
     const staff = await prisma.staff.findUnique({
-      where: { id: id }
+      where: { id: id },
+      include: {
+        user: true,
+        branch: true,
+        appointments: true,
+        salaries: true,
+        attendances: true,
+        clients: true,
+        usedProducts: true,
+        feedbacks: true
+      }
     });
 
     if (!staff) {
       return res.status(404).json({ message: "Staff member not found" });
     }
 
-    
+    // Remove sensitive information
+    const { password, ...staffData } = staff;
 
-    res.status(200).json(staff);
+    res.status(200).json(staffData);
   } catch (error) {
     console.error("Error fetching staff:", error);
     res.status(500).json({ message: "Server error" });
