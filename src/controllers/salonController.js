@@ -84,4 +84,51 @@ const getSalonById = async (req, res) => {
   }
 };
 
-module.exports = { createSalon , getSalonById };
+
+const updateSalon = async (req, res) => {
+  const { id, ...updateFields } = req.body;
+
+  try {
+    // Validate existing salon
+    const existingSalon = await prisma.salon.findUnique({
+      where: { id: id },
+    });
+
+    if (!existingSalon) {
+      return res.status(404).json({ message: "Salon not found" });
+    }
+
+    // Filter allowed fields
+    const allowedFields = ['salon_name', 'salon_tag', 'opening_time', 
+      'contact_email', 'contact_number', 'salon_img_url'];
+    const updateData = {};
+    
+    allowedFields.forEach(field => {
+      if (updateFields[field] !== undefined) {
+        updateData[field] = updateFields[field];
+      }
+    });
+
+    // Check for valid updates
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ message: "No valid fields provided" });
+    }
+
+    // Perform update
+    const updatedSalon = await prisma.salon.update({
+      where: { id: id },
+      data: updateData,
+    });
+
+    res.status(200).json({ 
+      message: "Salon updated successfully",
+      salon: updatedSalon 
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+module.exports = { createSalon , getSalonById , updateSalon };

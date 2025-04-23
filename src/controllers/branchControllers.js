@@ -15,6 +15,12 @@ const IsBranch = async (req, res) => {
         },
         service: true,
         inventory: true,
+        feedbacks:{
+           include:{
+              client:true,
+              staff:true
+           }
+        },
         usedProducts:{
            include:{
             staff:true,
