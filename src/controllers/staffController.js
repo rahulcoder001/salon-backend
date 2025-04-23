@@ -2,8 +2,12 @@ const prisma = require("../config/db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-const generateToken = (id, role) => {
-  return jwt.sign({ id, role }, process.env.JWT_SECRET, { expiresIn: "7d" });
+const generateToken = (userId, role, expiresIn) => {
+  return jwt.sign(
+    { userId, role },
+    process.env.JWT_SECRET,
+    { expiresIn: `${expiresIn}s` }
+  );
 };
 
 // **Staff Signup**
@@ -44,8 +48,6 @@ const staffSignup = async (req, res) => {
         branch_id
       },
     });
-
-    const token = generateToken(newStaff.id, "staff");
     res.status(201).json({ message: "Staff registered successfully", token, staff: newStaff });
   } catch (error) {
     console.error(error); // Log the error for debugging
@@ -56,13 +58,7 @@ const staffSignup = async (req, res) => {
 
 // **Staff Login**
 const staffLogin = async (req, res) => {
-  const generateToken = (userId, role, expiresIn) => {
-    return jwt.sign(
-      { userId, role },
-      process.env.JWT_SECRET,
-      { expiresIn: `${expiresIn}s` }
-    );
-  };
+  
   const { staffId, password } = req.body;
 
   try {
@@ -257,7 +253,6 @@ const  addSalary = async(req, res)=> {
 
 const getStaffByIdatnav = async (req, res) => {
   const { id } = req.params;
-
   try {
     const staff = await prisma.staff.findUnique({
       where: { id: id },
