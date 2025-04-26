@@ -41,14 +41,14 @@ const staffSignup = async (req, res) => {
         fullname,
         contact,
         email,
-        password: await bcrypt.hash(password, 10), // Always hash passwords
+        password: password, 
         profile_img,
         user_id,
         staff_id,
         branch_id
       },
     });
-    res.status(201).json({ message: "Staff registered successfully", token, staff: newStaff });
+    res.status(201).json({ message: "Staff registered successfully", staff: newStaff });
   } catch (error) {
     console.error(error); // Log the error for debugging
     res.status(500).json({ message: "Server error", error: error.message });
