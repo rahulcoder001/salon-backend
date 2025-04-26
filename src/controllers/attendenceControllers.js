@@ -1,46 +1,56 @@
-const prisma = require("../config/db");
+import prisma from "../config/db.js";
 
-const prisma = new PrismaClient();
+const addAttendance = async (req, res) => {
+    try {
+        const now = new Date();
+        
+        const todayStart = new Date(now);
+        todayStart.setHours(0, 0, 0, 0);
+        
+        const todayEnd = new Date(now);
+        todayEnd.setHours(23, 59, 59, 999);
 
-const  addAttendance = async(req,res)=> {
-  // Get today's start and end times
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-  
-  const todayEnd = new Date();
-  todayEnd.setHours(23, 59, 59, 999);
+        const existingAttendance = await prisma.attendance.findFirst({
+            where: {
+                staff_id: req.body.staffId,
+                date: {
+                    gte: todayStart,
+                    lte: todayEnd
+                }
+            }
+        });
 
-  // Check for existing attendance
-  const existingAttendance = await prisma.attendance.findFirst({
-    where: {
-      staff_id: req.body.staffId,
-      date: {
-        gte: todayStart,
-        lte: todayEnd
-      }
+        if (existingAttendance) {
+            return res.status(400).json({ 
+                message: 'Attendance already recorded today',
+                success: true // Fixed typo
+            });
+        }
+
+        const newAttendance = await prisma.attendance.create({
+            data: {
+                staff_id: req.body.staffId,
+                login_time: now.toLocaleTimeString('en-US', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                }),
+                date: now
+            }
+        });
+
+        return res.status(201).json({
+            newAttendance,
+            success: true // Fixed typo
+        });
+
+    } catch (error) {
+        console.error('Attendance error:', error);
+        return res.status(500).json({
+            message: error.message || 'Failed to record attendance',
+            success: false // Added proper error status
+        });
     }
-  });
+};
 
-  if (existingAttendance) {
-    throw new Error('Attendance already recorded for this staff member today');
-  }
-
-  // Create new attendance record
-  return await prisma.attendance.create({
-    data: {
-      staff_id: req.body.staffId,
-      login_time: req.body.loginTime
-      // date is automatically set by Prisma (now())
-    }
-  });
-}
-
-// Usage example
-try {
-  const newAttendance = await addAttendance('staff-uuid-123', '09:00 AM');
-  console.log('Attendance created:', newAttendance);
-} catch (error) {
-  console.error(error.message);
-}
-
-module.exports = {addAttendance}
+export { addAttendance }; // ES module export
