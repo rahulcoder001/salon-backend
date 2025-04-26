@@ -1,56 +1,63 @@
 import prisma from "../config/db.js";
 
 const addAttendance = async (req, res) => {
-    try {
-        const now = new Date();
-        
-        const todayStart = new Date(now);
-        todayStart.setHours(0, 0, 0, 0);
-        
-        const todayEnd = new Date(now);
-        todayEnd.setHours(23, 59, 59, 999);
+  try {
+      // Convert to IST (UTC+5:30)
+      const now = new Date();
+      const istOffset = 330 * 60000; // 5h30m in milliseconds
+      const istTime = new Date(now.getTime() + istOffset);
 
-        const existingAttendance = await prisma.attendance.findFirst({
-            where: {
-                staff_id: req.body.staffId,
-                date: {
-                    gte: todayStart,
-                    lte: todayEnd
-                }
-            }
-        });
+      // Set IST day boundaries
+      const todayStart = new Date(istTime);
+      todayStart.setHours(0, 0, 0, 0);
+      
+      const todayEnd = new Date(istTime);
+      todayEnd.setHours(23, 59, 59, 999);
 
-        if (existingAttendance) {
-            return res.status(400).json({ 
-                message: 'Attendance already recorded today',
-                success: true // Fixed typo
-            });
-        }
+      // Check existing attendance for IST date
+      const existingAttendance = await prisma.attendance.findFirst({
+          where: {
+              staff_id: req.body.staffId,
+              date: {
+                  gte: todayStart,
+                  lte: todayEnd
+              }
+          }
+      });
 
-        const newAttendance = await prisma.attendance.create({
-            data: {
-                staff_id: req.body.staffId,
-                login_time: now.toLocaleTimeString('en-US', {
-                    hour: 'numeric',
-                    minute: '2-digit',
-                    hour12: true
-                }),
-                date: now
-            }
-        });
+      if (existingAttendance) {
+          return res.status(400).json({ 
+              message: 'Attendance already recorded today',
+              success: false
+          });
+      }
 
-        return res.status(201).json({
-            newAttendance,
-            success: true // Fixed typo
-        });
+      // Create record with IST time
+      const newAttendance = await prisma.attendance.create({
+          data: {
+              staff_id: req.body.staffId,
+              login_time: istTime.toLocaleTimeString('en-IN', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: false
+              }),
+              date: todayStart // Store date without time component
+          }
+      });
 
-    } catch (error) {
-        console.error('Attendance error:', error);
-        return res.status(500).json({
-            message: error.message || 'Failed to record attendance',
-            success: false // Added proper error status
-        });
-    }
+      return res.status(201).json({
+          data: newAttendance,
+          message: 'Attendance recorded successfully',
+          success: true
+      });
+
+  } catch (error) {
+      console.error('Error:', error);
+      return res.status(500).json({
+          message: 'Failed to record attendance',
+          success: false
+      });
+  }
 };
 
 export { addAttendance }; // ES module export
