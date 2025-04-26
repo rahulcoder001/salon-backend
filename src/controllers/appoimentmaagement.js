@@ -303,7 +303,7 @@ module.exports = {
   createAppointment ,
   getAppointmentsBySalon , 
   cancelAppointment , 
-  updateAppointment,
+  updateAppointmentStatus,
   getSalonRevenueLast30Days,
   getRecentAppointmentsCount
 };
