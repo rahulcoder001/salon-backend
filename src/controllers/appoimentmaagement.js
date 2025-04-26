@@ -117,22 +117,32 @@ const getAppointmentsBySalon = async (req, res) => {
 };
 
 // Update appointment
-const updateAppointment = async (req, res) => {
+const updateAppointmentStatus = async (req, res) => {
   const { id } = req.params;
-  const updateData = req.body;
+  const { status } = req.body;
 
   try {
+    // Validate allowed status values
+    const allowedStatuses = ['pending', 'confirmed', 'cancelled'];
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        message: "Invalid status value",
+        allowedValues: allowedStatuses
+      });
+    }
+
     const existingAppointment = await prisma.appointment.findUnique({
-      where: { id },
+      where: { id }
     });
 
     if (!existingAppointment) {
       return res.status(404).json({ message: "Appointment not found" });
     }
 
+    // Update only the status field
     const updatedAppointment = await prisma.appointment.update({
       where: { id },
-      data: updateData,
+      data: { status },
       include: {
         salon: true,
         branch: true,
@@ -143,13 +153,13 @@ const updateAppointment = async (req, res) => {
     });
 
     res.status(200).json({
-      message: "Appointment updated successfully",
-      appointment: updatedAppointment,
+      message: "Appointment status updated successfully",
+      appointment: updatedAppointment
     });
   } catch (error) {
     res.status(500).json({
-      message: "Error updating appointment",
-      error: error.message,
+      message: "Error updating appointment status",
+      error: error.message
     });
   }
 };
