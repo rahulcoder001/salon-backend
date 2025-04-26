@@ -13,7 +13,7 @@ const  addAttendance = async(req,res)=> {
   // Check for existing attendance
   const existingAttendance = await prisma.attendance.findFirst({
     where: {
-      staff_id: staffId,
+      staff_id: req.body.staffId,
       date: {
         gte: todayStart,
         lte: todayEnd
