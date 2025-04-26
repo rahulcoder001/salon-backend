@@ -258,7 +258,11 @@ const getStaffByIdatnav = async (req, res) => {
       where: { id: id },
       include: {
         user: true,
-        branch: true,
+        branch:{
+           include:{
+            service:true
+           }
+        },
         appointments: true,
         salaries: true,
         attendances: true,
