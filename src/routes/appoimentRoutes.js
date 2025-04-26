@@ -1,5 +1,5 @@
 const express = require("express");
-const { createAppointment, getAppointmentsBySalon, updateAppointment, deleteAppointment, getSalonRevenueLast30Days, getRecentAppointmentsCount } = require("../controllers/appoimentmaagement");
+const { createAppointment, getAppointmentsBySalon, updateAppointment, deleteAppointment, getSalonRevenueLast30Days, getRecentAppointmentsCount, cancelAppointment } = require("../controllers/appoimentmaagement");
 const router = express.Router();
 
 router.post('/create', createAppointment);
@@ -8,10 +8,10 @@ router.post('/create', createAppointment);
 router.get('/:salonId', getAppointmentsBySalon);
 
 // Update appointment
-router.put('/:id', updateAppointment);
+router.put('/update/:id', updateAppointment);
 
 // Delete appointment
-router.delete('/:id', deleteAppointment);
+router.put('/cancel/:id', cancelAppointment);
 
 router.get("/totalprice/:salonId",getSalonRevenueLast30Days)
 router.get("/latestappointment/:salonId",getRecentAppointmentsCount)

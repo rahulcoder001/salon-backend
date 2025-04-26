@@ -155,7 +155,7 @@ const updateAppointment = async (req, res) => {
 };
 
 // Delete appointment
-const deleteAppointment = async (req, res) => {
+const cancelAppointment = async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -167,20 +167,34 @@ const deleteAppointment = async (req, res) => {
       return res.status(404).json({ message: "Appointment not found" });
     }
 
-    await prisma.appointment.delete({
+    // Update appointment status to cancelled instead of deleting
+    const cancelledAppointment = await prisma.appointment.update({
       where: { id },
+      data: {
+        status: "cancelled"
+      },
+      include: {
+        salon: true,
+        branch: true,
+        staff: true,
+        service: true,
+        client: true,
+      },
     });
 
     res.status(200).json({
-      message: "Appointment deleted successfully",
+      message: "Appointment cancelled successfully",
+      appointment: cancelledAppointment,
     });
   } catch (error) {
     res.status(500).json({
-      message: "Error deleting appointment",
+      message: "Error cancelling appointment",
       error: error.message,
     });
   }
 };
+
+
 
 
 const getSalonRevenueLast30Days = async (req, res) => {
@@ -278,7 +292,7 @@ const getRecentAppointmentsCount = async (req, res) => {
 module.exports = {
   createAppointment ,
   getAppointmentsBySalon , 
-  deleteAppointment , 
+  cancelAppointment , 
   updateAppointment,
   getSalonRevenueLast30Days,
   getRecentAppointmentsCount
