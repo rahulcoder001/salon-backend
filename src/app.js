@@ -16,6 +16,7 @@ const clientRoutes = require("./routes/clientRoutes")
 const charRoutes = require("./routes/chartRoutes")
 const financeRoutes=require("./routes/financialRoutes")
 const feedbackRoutes=require("./routes/feedbackRoutes")
+const attendenceRoutes = require("./routes/attendanceRoutes")
 const app = express();
 
 // Middlewares
@@ -49,6 +50,7 @@ app.use("/api/clients",clientRoutes);
 app.use("/api/chart",charRoutes);
 app.use("/api/finance",financeRoutes);
 app.use("/api/feedback",feedbackRoutes);
+app.use("/api/attendence", attendenceRoutes);
 
 
 app.get("/", (req, res) => {
