@@ -263,7 +263,12 @@ const getStaffByIdatnav = async (req, res) => {
             service:true
            }
         },
-        appointments: true,
+        appointments:{
+          include:{
+            service:true,
+            client:true
+          }
+        },
         salaries: true,
         attendances: true,
         clients: true,
