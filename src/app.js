@@ -26,7 +26,8 @@ app.use(express.json());
 // CORS Configuration
 const allowedOrigins = [
   "https://salon.edubotix.online",
-  "http://localhost:3000"
+  "http://localhost:3000",
+  "https://salon.movestrongly.com"
 ];
 
 const corsOptions = {
