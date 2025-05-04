@@ -48,7 +48,12 @@ const getFinancialData = async (req, res) => {
 
     const financialData = branches.map(branch => {
       const earnings = branch.appointments.reduce(
-        (sum, appointment) => sum + (appointment.service?.service_price || 0),
+        (sum, appointment) => 
+          sum + (
+            appointment.status === "confirmed" 
+              ? (appointment.service?.service_price || 0) 
+              : 0
+          ),
         0
       );
 

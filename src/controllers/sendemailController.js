@@ -7,8 +7,8 @@ const transporter = nodemailer.createTransport({
     port: 465,
     secure: true, // true for 465, false for 587
     auth: {
-      user: 'customer@movestrongly.com', // example: Info@ashtcabservices.in
-      pass: 'Alpixn@123',   // the real password from Hostinger
+      user: process.env.HOSTINGER_EMAIL, // example: Info@ashtcabservices.in
+      pass: process.env.HOSTINGER_PASS,   // the real password from Hostinger
     },
   });
 
@@ -188,12 +188,13 @@ const Sendotp =  (req, res) => {
     const text = `Your SalonSphere OTP code is: ${otp}\nThis code is valid for 10 minutes.`;
 
     const mailOptions = {
-        from: '"SalonSphere" <customer@movestrongly.com>',
+        from: process.env.EMAIL_FROM,
         to,
         subject,
         text,
-        html
-    };
+        html,
+      };
+      
 
     transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
@@ -481,13 +482,14 @@ const welcomMail = (req, res) => {
                + "Access your dashboard to start managing staff, appointments, and finances.\n\n"
                + "Best regards,\nThe SalonSphere Team";
 
-    const mailOptions = {
-        from: '"SalonSphere Team" <customer@movestrongly.com>',
-        to,
-        subject,
-        text,
-        html
-    };
+               const mailOptions = {
+                from: process.env.EMAIL_FROM,
+                to,
+                subject,
+                text,
+                html,
+              };
+              
 
     transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
@@ -596,13 +598,14 @@ const forgotPasswordMail = (req, res) => {
                + "This OTP is valid for 10 minutes\n\n"
                + "If you didn't request this, please contact support.";
 
-    const mailOptions = {
-        from: '"SalonSphere Security" <customer@movestrongly.com>',
-        to: to,
-        subject: subject,
-        text: text,
-        html: html
-    };
+               const mailOptions = {
+                from: process.env.EMAIL_FROM,
+                to,
+                subject,
+                text,
+                html,
+              };
+              
 
     // Send email
     transporter.sendMail(mailOptions, (error, info) => {
@@ -727,13 +730,14 @@ const passwordResetConfirmation = (req, res) => {
                + "Best regards,\n"
                + "SalonSphere Security Team";
 
-    const mailOptions = {
-        from: '"SalonSphere Security" <customer@movestrongly.com>',
-        to: to,
-        subject: subject,
-        text: text,
-        html: html
-    };
+               const mailOptions = {
+                from: process.env.EMAIL_FROM,
+                to,
+                subject,
+                text,
+                html,
+              };
+              
 
     // Send email
     transporter.sendMail(mailOptions, (error, info) => {

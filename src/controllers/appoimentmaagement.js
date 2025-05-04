@@ -243,7 +243,11 @@ const getSalonRevenueLast30Days = async (req, res) => {
 
     // Calculate total revenue
     const totalRevenue = appointments.reduce((sum, appointment) => {
-      return sum + (appointment.service?.service_price || 0);
+      return sum + (
+        appointment.status === "confirmed" 
+          ? (appointment.service?.service_price || 0) 
+          : 0
+      );
     }, 0);
 
     return res.status(200).json({
