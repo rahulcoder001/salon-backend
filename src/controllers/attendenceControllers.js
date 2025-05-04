@@ -60,4 +60,4 @@ const addAttendance = async (req, res) => {
   }
 };
 
-export { addAttendance }; // ES module export
+module.exports = { addAttendance }; // ES module export
