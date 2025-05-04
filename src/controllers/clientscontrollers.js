@@ -54,7 +54,7 @@ const getRecentClientsCount = async (req, res) => {
       });
   
       if (existingClient) {
-        return res.status(409).json({ message: "Client with this email already exists." });
+        return res.status(409).json({ message: "Client with this email already exists." , client:existingClient });
       }
   
       // Create new client
