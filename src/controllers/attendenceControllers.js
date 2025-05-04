@@ -1,4 +1,4 @@
-import prisma from "../config/db.js";
+const prisma = require("../config/db");
 
 const addAttendance = async (req, res) => {
   try {

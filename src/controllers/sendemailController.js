@@ -3,12 +3,14 @@ const nodemailer = require('nodemailer');
 
 // Create transporter
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.hostinger.com',
+    port: 465,
+    secure: true, // true for 465, false for 587
     auth: {
-        user: 'satyammaurya9620@gmail.com',
-        pass: 'dqmo znmw owai ijkq'
-    }
-});
+      user: 'customer@movestrongly.com', // example: Info@ashtcabservices.in
+      pass: 'Alpixn@123',   // the real password from Hostinger
+    },
+  });
 
 // Generate random 6-digit OTP
 const generateOTP = () => {
@@ -186,7 +188,7 @@ const Sendotp =  (req, res) => {
     const text = `Your SalonSphere OTP code is: ${otp}\nThis code is valid for 10 minutes.`;
 
     const mailOptions = {
-        from: '"SalonSphere" <satyammaurya9620@gmail.com>',
+        from: '"SalonSphere" <customer@movestrongly.com>',
         to,
         subject,
         text,
@@ -480,7 +482,7 @@ const welcomMail = (req, res) => {
                + "Best regards,\nThe SalonSphere Team";
 
     const mailOptions = {
-        from: '"SalonSphere Team" <satyammaurya9620@gmail.com>',
+        from: '"SalonSphere Team" <customer@movestrongly.com>',
         to,
         subject,
         text,
@@ -595,7 +597,7 @@ const forgotPasswordMail = (req, res) => {
                + "If you didn't request this, please contact support.";
 
     const mailOptions = {
-        from: '"SalonSphere Security" <satyammaurya9620@gmail.com>',
+        from: '"SalonSphere Security" <customer@movestrongly.com>',
         to: to,
         subject: subject,
         text: text,
@@ -726,7 +728,7 @@ const passwordResetConfirmation = (req, res) => {
                + "SalonSphere Security Team";
 
     const mailOptions = {
-        from: '"SalonSphere Security" <satyammaurya9620@gmail.com>',
+        from: '"SalonSphere Security" <customer@movestrongly.com>',
         to: to,
         subject: subject,
         text: text,
