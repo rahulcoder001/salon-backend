@@ -18,7 +18,7 @@ const financeRoutes = require("./routes/financialRoutes");
 const feedbackRoutes = require("./routes/feedbackRoutes");
 const attendenceRoutes = require("./routes/attendanceRoutes");
 const pakageRoutes = require("./routes/pakageRoutes.js")
-
+const salespersonRoutes=require("./routes/salesRoutes.js")
 const purchasedplanRoutes=require("./routes/purchasedplanRoutes.js")
 const app = express();
 
@@ -68,7 +68,7 @@ app.use("/api/feedback", feedbackRoutes);
 app.use("/api/attendence", attendenceRoutes);
 app.use("/api/purchasedplan",purchasedplanRoutes)
 app.use("/api/packages", pakageRoutes)
-
+app.use("/api/sales",salespersonRoutes)
 
 
 app.get("/", (req, res) => {
