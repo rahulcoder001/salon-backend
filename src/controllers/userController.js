@@ -265,6 +265,74 @@ const getUsersByPeriod = async (req, res) => {
   }
 };
 
+const getAllUsersWithContactInfo = async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        fullname: true,
+        email: true,
+        contact: true,
+        createdAt: true,
+        profile_img: true,
+        PurchasedPlan: {
+          select: {
+            date: true,
+            package: {
+              select: {
+                name: true,
+                price: true,
+                branchLimit: true,
+                features: true
+              }
+            }
+          }
+        },
+        salon: {
+          select: {
+            salon_name: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    // Format the output
+    const formattedUsers = users.map(user => ({
+      id: user.id,
+      name: user.fullname,
+      email: user.email,
+      phone: user.contact,
+      profile_image: user.profile_img,
+      created_at: user.createdAt,
+      salon: user.salon?.salon_name || null,
+      purchasedPlans: user.PurchasedPlan.map(plan => ({
+        purchaseDate: plan.date,
+        planName: plan.package.name,
+        price: plan.package.price,
+        branchLimit: plan.package.branchLimit,
+        features: plan.package.features
+      }))
+    }));
+
+    res.status(200).json({
+      success: true,
+      count: formattedUsers.length,
+      data: formattedUsers
+    });
+
+  } catch (error) {
+    console.error("Get Users Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching users",
+      error: error.message
+    });
+  }
+};
+
 
 
 module.exports = {
@@ -273,5 +341,6 @@ module.exports = {
   changePassword,
   getUserById, 
    updateUser,
-   getUsersByPeriod
+   getUsersByPeriod,
+   getAllUsersWithContactInfo
 };

@@ -5,7 +5,8 @@ const {
   changePassword, 
   getUserById,  // ✅ Step 1: Import the controller
   updateUser,
-  getUsersByPeriod
+  getUsersByPeriod,
+  getAllUsersWithContactInfo
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -18,8 +19,10 @@ router.post("/login", userLogin);
 router.post("/forgetpassword", changePassword);
 
 router.get("/getalluser",getUsersByPeriod)
+router.get("/getallusercontactinfo",getAllUsersWithContactInfo)
 router.get("/:user_id", getUserById);
 router.put("/:user_id",updateUser)
+
 
 
 module.exports = router;
