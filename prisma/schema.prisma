@@ -8,43 +8,61 @@ datasource db {
 }
 
 model User {
-  id            String          @id @default(uuid())
-  fullname      String
-  email         String          @unique
-  contact       String
-  password      String
-  profile_img   String?
-  salonId       String?
-  step          Int?
-  createdAt     DateTime        @default(now())
-  salon         Salon?          @relation(fields: [salonId], references: [id])
+  id           String   @id @default(uuid())
+  fullname     String
+  email        String   @unique
+  contact      String
+  password     String
+  profile_img  String?
+  salonId      String?
+  step         Int?
+  createdAt    DateTime @default(now())
+  salesmanId   String?
+  activePlanId String?
+
+  // Relations
+  salon         Salon?               @relation(fields: [salonId], references: [id])
   staff         Staff[]
   PurchasedPlan PurchasedPlan[]
+  salesman      Salesman?            @relation(fields: [salesmanId], references: [id])
+  activePlan    SubscriptionPackage? @relation("ActivePlan", fields: [activePlanId], references: [id])
+  ownerFeedback ownerFeedback[] // 👈 This line connects feedbacks to User
+}
+
+model Salesman {
+  id         String   @id @default(uuid())
+  name       String
+  email      String   @unique
+  contact    String   @unique
+  createdAt  DateTime @default(now()) // Add this line
+  commission Float
+  users      User[]
 }
 
 model Staff {
-  id           String        @id @default(uuid())
-  fullname     String
-  email        String        @unique
-  contact      String        @unique
-  password     String
-  profile_img  String?
-  user_id      String
-  branch_id    String
-  staff_id     String        @unique
+  id          String  @id @default(uuid())
+  fullname    String
+  email       String  @unique
+  contact     String  @unique
+  password    String
+  profile_img String?
+  user_id     String
+  branch_id   String
+  staff_id    String  @unique
+
+  // Relations
   appointments Appointment[]
   salaries     Salary[]
   attendances  Attendance[]
   clients      Client[]
   usedProducts UsedProduct[]
   feedbacks    Feedback[]
-
-  user   User   @relation(fields: [user_id], references: [id])
-  branch Branch @relation(fields: [branch_id], references: [id])
+  user         User          @relation(fields: [user_id], references: [id])
+  branch       Branch        @relation(fields: [branch_id], references: [id])
 }
 
 model Salon {
-  id             String        @id @default(uuid())
+  id             String  @id @default(uuid())
   salon_name     String
   salon_tag      String
   opening_time   String?
@@ -52,15 +70,16 @@ model Salon {
   contact_number String
   branch_url     String?
   salon_img_url  String?
-  appointments   Appointment[]
-  clients        Client[]
 
-  branches Branch[]
-  users    User[]
+  // Relations
+  appointments Appointment[]
+  clients      Client[]
+  branches     Branch[]
+  users        User[]
 }
 
 model Branch {
-  id              String        @id @default(uuid())
+  id              String @id @default(uuid())
   branch_name     String
   branch_location String
   salon_id        String
@@ -68,14 +87,15 @@ model Branch {
   contact_number  String
   opning_time     String
   closeings_time  String
-  appointments    Appointment[]
-  usedProducts    UsedProduct[]
-  feedbacks       Feedback[]
 
-  salon     Salon       @relation(fields: [salon_id], references: [id])
-  staff     Staff[]
-  inventory Inventory[]
-  service   Service[]
+  // Relations
+  appointments Appointment[]
+  usedProducts UsedProduct[]
+  feedbacks    Feedback[]
+  salon        Salon         @relation(fields: [salon_id], references: [id])
+  staff        Staff[]
+  inventory    Inventory[]
+  service      Service[]
 }
 
 model Inventory {
@@ -85,52 +105,56 @@ model Inventory {
   price            Int
   branch_id        String
 
+  // Relations
   branch Branch @relation(fields: [branch_id], references: [id])
 }
 
 model Service {
-  id            String        @id @default(uuid())
+  id            String @id @default(uuid())
   service_name  String
   service_price Int
   time          Int
   branch_id     String
-  appointments  Appointment[]
 
-  branch Branch @relation(fields: [branch_id], references: [id])
+  // Relations
+  appointments Appointment[]
+  branch       Branch        @relation(fields: [branch_id], references: [id])
 }
 
 model Client {
-  id           String        @id @default(uuid())
-  client_name  String
-  email        String
-  contact      String
-  salon_id     String
-  staff_id     String?
+  id          String   @id @default(uuid())
+  client_name String
+  email       String
+  contact     String
+  salon_id    String
+  staff_id    String?
+  createdAt   DateTime @default(now())
+
+  // Relations
   appointments Appointment[]
   feedbacks    Feedback[]
-  createdAt    DateTime      @default(now())
-
-  salon Salon  @relation(fields: [salon_id], references: [id])
-  staff Staff? @relation(fields: [staff_id], references: [id])
+  salon        Salon         @relation(fields: [salon_id], references: [id])
+  staff        Staff?        @relation(fields: [staff_id], references: [id])
 }
 
 model Appointment {
-  id           String        @id @default(uuid())
-  salon_id     String
-  branch_id    String
-  staff_id     String
-  service_id   String
-  client_id    String
-  date         String
-  time         String
-  status       String?       @default("pending")
-  usedProducts UsedProduct[]
+  id         String  @id @default(uuid())
+  salon_id   String
+  branch_id  String
+  staff_id   String
+  service_id String
+  client_id  String
+  date       String
+  time       String
+  status     String? @default("pending")
 
-  salon   Salon   @relation(fields: [salon_id], references: [id])
-  branch  Branch  @relation(fields: [branch_id], references: [id])
-  staff   Staff   @relation(fields: [staff_id], references: [id])
-  service Service @relation(fields: [service_id], references: [id])
-  client  Client  @relation(fields: [client_id], references: [id])
+  // Relations
+  usedProducts UsedProduct[]
+  salon        Salon         @relation(fields: [salon_id], references: [id])
+  branch       Branch        @relation(fields: [branch_id], references: [id])
+  staff        Staff         @relation(fields: [staff_id], references: [id])
+  service      Service       @relation(fields: [service_id], references: [id])
+  client       Client        @relation(fields: [client_id], references: [id])
 }
 
 model Salary {
@@ -138,7 +162,9 @@ model Salary {
   staff_id String
   amount   Int
   date     DateTime @default(now())
-  staff    Staff    @relation(fields: [staff_id], references: [id])
+
+  // Relations
+  staff Staff @relation(fields: [staff_id], references: [id])
 }
 
 model Attendance {
@@ -146,7 +172,9 @@ model Attendance {
   staff_id   String
   date       DateTime @default(now())
   login_time String
-  staff      Staff    @relation(fields: [staff_id], references: [id])
+
+  // Relations
+  staff Staff @relation(fields: [staff_id], references: [id])
 }
 
 model UsedProduct {
@@ -158,6 +186,7 @@ model UsedProduct {
   appointment_id String
   date           DateTime @default(now())
 
+  // Relations
   branch      Branch      @relation(fields: [branch_id], references: [id])
   staff       Staff       @relation(fields: [staff_id], references: [id])
   appointment Appointment @relation(fields: [appointment_id], references: [id])
@@ -173,26 +202,41 @@ model Feedback {
   review    String
   feature   Boolean  @default(false)
 
+  // Relations
   client Client @relation(fields: [client_id], references: [id])
   branch Branch @relation(fields: [branch_id], references: [id])
   staff  Staff  @relation(fields: [staff_id], references: [id])
 }
 
 model SubscriptionPackage {
-  id            String          @id @default(uuid())
-  name          String          @unique
-  price         Int
-  description   String
-  branchLimit   Int
-  features      String[]
+  id          String   @id @default(uuid())
+  name        String   @unique
+  price       Int
+  description String
+  branchLimit Int
+  features    String[]
+
+  // Relations
   PurchasedPlan PurchasedPlan[] @relation("PackageToPlan")
+  activeUsers   User[]          @relation("ActivePlan")
+}
+
+model ownerFeedback {
+  id       String   @id @default(uuid())
+  feedback String
+  userid   String
+  date     DateTime @default(now())
+  // Relations
+  user     User     @relation(fields: [userid], references: [id])
 }
 
 model PurchasedPlan {
-  id        String              @id @default(uuid())
+  id        String   @id @default(uuid())
   userId    String
   packageId String
-  date      DateTime            @default(now())
-  user      User                @relation(fields: [userId], references: [id])
-  package   SubscriptionPackage @relation("PackageToPlan", fields: [packageId], references: [id])
+  date      DateTime @default(now())
+
+  // Relations
+  user    User                @relation(fields: [userId], references: [id])
+  package SubscriptionPackage @relation("PackageToPlan", fields: [packageId], references: [id])
 }

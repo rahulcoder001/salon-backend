@@ -275,6 +275,7 @@ const getAllUsersWithContactInfo = async (req, res) => {
         contact: true,
         createdAt: true,
         profile_img: true,
+        ownerFeedback:true,
         PurchasedPlan: {
           select: {
             date: true,
@@ -288,6 +289,7 @@ const getAllUsersWithContactInfo = async (req, res) => {
             }
           }
         },
+        activePlan:true,
         salon: {
           select: {
             salon_name: true
@@ -314,7 +316,9 @@ const getAllUsersWithContactInfo = async (req, res) => {
         price: plan.package.price,
         branchLimit: plan.package.branchLimit,
         features: plan.package.features
-      }))
+      })),
+      activePlan:user.activePlan,
+      ownerFeedback:user.ownerFeedback
     }));
 
     res.status(200).json({
