@@ -192,6 +192,79 @@ const updateUser = async (req, res) => {
   }
 };
 
+const getUsersByPeriod = async (req, res) => {
+  const now = new Date();
+
+  // Calculate time ranges
+  const todayStart = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
+
+  const weekStart = new Date(now);
+  const day = weekStart.getDay(); // 0 (Sunday) to 6 (Saturday)
+  const diff = day === 0 ? 6 : day - 1; // Days since Monday
+  weekStart.setDate(weekStart.getDate() - diff);
+  weekStart.setHours(0, 0, 0, 0);
+
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  try {
+    // Get the earliest date to optimize database query
+    const earliestDate = new Date(Math.min(
+      todayStart.getTime(),
+      weekStart.getTime(),
+      monthStart.getTime()
+    ));
+
+    // Fetch all relevant users
+    const users = await prisma.user.findMany({
+      where: {
+        createdAt: {
+          gte: earliestDate
+        }
+      },
+      select: {
+        id: true,
+        fullname: true,
+        email: true,
+        contact: true,
+        profile_img: true,
+        salonId: true,
+        step: true,
+        createdAt: true
+      }
+    });
+
+    // Categorize users
+    const result = {
+      daily: { count: 0, users: [] },
+      weekly: { count: 0, users: [] },
+      monthly: { count: 0, users: [] }
+    };
+
+    users.forEach(user => {
+      const createdAt = user.createdAt;
+      
+      if (createdAt >= todayStart) {
+        result.daily.users.push(user);
+        result.daily.count++;
+      }
+      if (createdAt >= weekStart) {
+        result.weekly.users.push(user);
+        result.weekly.count++;
+      }
+      if (createdAt >= monthStart) {
+        result.monthly.users.push(user);
+        result.monthly.count++;
+      }
+    });
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Get Users by Period Error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
 
 
 module.exports = {
@@ -199,5 +272,6 @@ module.exports = {
   userLogin,
   changePassword,
   getUserById, 
-   updateUser
+   updateUser,
+   getUsersByPeriod
 };

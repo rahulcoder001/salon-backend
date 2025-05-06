@@ -18,6 +18,7 @@ const financeRoutes = require("./routes/financialRoutes");
 const feedbackRoutes = require("./routes/feedbackRoutes");
 const attendenceRoutes = require("./routes/attendanceRoutes");
 
+const purchasedplanRoutes=require("./routes/purchasedplanRoutes.js")
 const app = express();
 
 // Middlewares
@@ -64,6 +65,8 @@ app.use("/api/chart", chartRoutes);
 app.use("/api/finance", financeRoutes);
 app.use("/api/feedback", feedbackRoutes);
 app.use("/api/attendence", attendenceRoutes);
+app.use("/api/purchasedplan",purchasedplanRoutes)
+
 
 app.get("/", (req, res) => {
   res.send("API is running...");

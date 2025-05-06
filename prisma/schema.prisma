@@ -8,16 +8,18 @@ datasource db {
 }
 
 model User {
-  id          String  @id @default(uuid())
-  fullname    String
-  email       String  @unique
-  contact     String
-  password    String
-  profile_img String?
-  salonId     String?
-  step        Int?
-  salon       Salon?  @relation(fields: [salonId], references: [id])
-  staff       Staff[]
+  id            String          @id @default(uuid())
+  fullname      String
+  email         String          @unique
+  contact       String
+  password      String
+  profile_img   String?
+  salonId       String?
+  step          Int?
+  createdAt     DateTime        @default(now())
+  salon         Salon?          @relation(fields: [salonId], references: [id])
+  staff         Staff[]
+  PurchasedPlan PurchasedPlan[]
 }
 
 model Staff {
@@ -174,4 +176,23 @@ model Feedback {
   client Client @relation(fields: [client_id], references: [id])
   branch Branch @relation(fields: [branch_id], references: [id])
   staff  Staff  @relation(fields: [staff_id], references: [id])
+}
+
+model SubscriptionPackage {
+  id            String          @id @default(uuid())
+  name          String          @unique
+  price         Int
+  description   String
+  branchLimit   Int
+  features      String[]
+  PurchasedPlan PurchasedPlan[] @relation("PackageToPlan")
+}
+
+model PurchasedPlan {
+  id        String              @id @default(uuid())
+  userId    String
+  packageId String
+  date      DateTime            @default(now())
+  user      User                @relation(fields: [userId], references: [id])
+  package   SubscriptionPackage @relation("PackageToPlan", fields: [packageId], references: [id])
 }

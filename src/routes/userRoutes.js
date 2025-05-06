@@ -4,7 +4,8 @@ const {
   userSignup, 
   changePassword, 
   getUserById,  // ✅ Step 1: Import the controller
-  updateUser
+  updateUser,
+  getUsersByPeriod
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -16,8 +17,9 @@ router.post("/login", userLogin);
 // Password reset
 router.post("/forgetpassword", changePassword);
 
-// ✅ Step 2: Add route to get user by ID
+router.get("/getalluser",getUsersByPeriod)
 router.get("/:user_id", getUserById);
 router.put("/:user_id",updateUser)
+
 
 module.exports = router;
