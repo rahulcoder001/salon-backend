@@ -55,7 +55,12 @@ const createPackage = async (req, res) => {
 const updatePackage = async (req, res) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
+    const { isUnlimitedBranches, ...updateData } = req.body;
+
+    // Handle branch limit conversion if needed
+    if (typeof isUnlimitedBranches !== 'undefined') {
+      updateData.branchLimit = isUnlimitedBranches ? 9999 : updateData.branchLimit;
+    }
 
     const updatedPackage = await prisma.subscriptionPackage.update({
       where: { id },
@@ -66,10 +71,7 @@ const updatePackage = async (req, res) => {
       }
     });
 
-    res.status(200).json({
-      success: true,
-      data: updatedPackage
-    });
+    res.status(200).json({ success: true, data: updatedPackage });
   } catch (error) {
     res.status(404).json({
       success: false,
@@ -84,18 +86,27 @@ const deletePackage = async (req, res) => {
   try {
     const { id } = req.params;
 
+    // First check if package exists
+    const existingPackage = await prisma.subscriptionPackage.findUnique({
+      where: { id }
+    });
+
+    if (!existingPackage) {
+      return res.status(404).json({
+        success: false,
+        message: "Package not found"
+      });
+    }
+
     await prisma.subscriptionPackage.delete({
       where: { id }
     });
 
-    res.status(200).json({
-      success: true,
-      message: "Package deleted successfully"
-    });
+    res.status(200).json({ success: true, message: "Package deleted successfully" });
   } catch (error) {
-    res.status(404).json({
+    res.status(500).json({
       success: false,
-      message: "Package not found or delete failed",
+      message: "Delete failed",
       error: error.message
     });
   }
