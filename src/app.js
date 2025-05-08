@@ -20,6 +20,7 @@ const attendenceRoutes = require("./routes/attendanceRoutes");
 const pakageRoutes = require("./routes/pakageRoutes.js")
 const salespersonRoutes=require("./routes/salesRoutes.js")
 const purchasedplanRoutes=require("./routes/purchasedplanRoutes.js")
+const smscompaignroutes=require("./routes/smscompaignRoutes.js")
 const app = express();
 
 // Middlewares
@@ -69,6 +70,7 @@ app.use("/api/attendence", attendenceRoutes);
 app.use("/api/purchasedplan",purchasedplanRoutes)
 app.use("/api/packages", pakageRoutes)
 app.use("/api/sales",salespersonRoutes)
+app.use("/api/sms",smscompaignroutes)
 
 
 app.get("/", (req, res) => {
