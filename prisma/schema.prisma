@@ -26,17 +26,27 @@ model User {
   PurchasedPlan PurchasedPlan[]
   salesman      Salesman?            @relation(fields: [salesmanId], references: [id])
   activePlan    SubscriptionPackage? @relation("ActivePlan", fields: [activePlanId], references: [id])
-  ownerFeedback ownerFeedback[] // 👈 This line connects feedbacks to User
+  ownerFeedback ownerFeedback[]
 }
 
 model Salesman {
+  id           String           @id @default(uuid())
+  name         String
+  email        String           @unique
+  contact      String           @unique
+  commission   Float
+  referralCode String?          @unique // Make optional temporarily
+  createdAt    DateTime         @default(now())
+  users        User[]
+  salaries     SalesmanSalary[]
+}
+
+model SalesmanSalary {
   id         String   @id @default(uuid())
-  name       String
-  email      String   @unique
-  contact    String   @unique
-  createdAt  DateTime @default(now()) // Add this line
-  commission Float
-  users      User[]
+  amount     Int
+  date       DateTime @default(now())
+  salesmanId String
+  salesman   Salesman @relation(fields: [salesmanId], references: [id])
 }
 
 model Staff {
@@ -226,8 +236,9 @@ model ownerFeedback {
   feedback String
   userid   String
   date     DateTime @default(now())
+
   // Relations
-  user     User     @relation(fields: [userid], references: [id])
+  user User @relation(fields: [userid], references: [id])
 }
 
 model PurchasedPlan {

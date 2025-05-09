@@ -20,7 +20,7 @@ const attendenceRoutes = require("./routes/attendanceRoutes");
 const pakageRoutes = require("./routes/pakageRoutes.js")
 const salespersonRoutes=require("./routes/salesRoutes.js")
 const purchasedplanRoutes=require("./routes/purchasedplanRoutes.js")
-const smscompaignroutes=require("./routes/smscompaignRoutes.js")
+const adminFinaneRoutes = require("./routes/financeRoutes.js")
 const app = express();
 
 // Middlewares
@@ -30,7 +30,8 @@ app.use(express.json());
 const allowedOrigins = [
   "https://salon.edubotix.online",
   "http://localhost:3000",
-  "https://salon.movestrongly.com"
+  "https://salon.movestrongly.com",
+  "https://evankiunisexsalon.in"
 ];
 
 const corsOptions = {
@@ -70,7 +71,7 @@ app.use("/api/attendence", attendenceRoutes);
 app.use("/api/purchasedplan",purchasedplanRoutes)
 app.use("/api/packages", pakageRoutes)
 app.use("/api/sales",salespersonRoutes)
-app.use("/api/sms",smscompaignroutes)
+app.use("/api/adminfinance", adminFinaneRoutes)
 
 
 app.get("/", (req, res) => {
