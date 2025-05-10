@@ -263,10 +263,7 @@ const getSalesmanById = async (req, res) => {
       totalRevenue: salesman.users.reduce((acc, user) => 
         acc + user.PurchasedPlan.reduce((sum, plan) => sum + (plan.package?.price || 0), 0)
       , 0),
-      salaryHistory: salesman.salaries.map(salary => ({
-        amount: salary.amount,
-        date: salary.date
-      }))
+      
     };
 
     res.status(200).json({

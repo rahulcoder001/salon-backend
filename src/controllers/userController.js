@@ -7,11 +7,22 @@ const generateToken = (id, role) => {
 };
 
 const userSignup = async (req, res) => {
-  const { fullname, contact, email, password, profile_img } = req.body;
+  const { fullname, contact, email, password, profile_img, referralCode } = req.body;
 
   try {
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) return res.status(400).json({ message: "Email already in use" });
+
+    let salesman = null;
+    if (referralCode) {
+      salesman = await prisma.salesman.findUnique({
+        where: { referralCode },
+      });
+      if (!salesman) {
+        return res.status(400).json({ message: "Invalid referral code" });
+      }
+    }
+    console.log(salesman)
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -22,7 +33,8 @@ const userSignup = async (req, res) => {
         email,
         password: hashedPassword,
         profile_img,
-        step:1
+        step: 1,
+        salesmanId: salesman?.id,
       },
     });
 

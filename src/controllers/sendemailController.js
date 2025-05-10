@@ -757,6 +757,611 @@ const passwordResetConfirmation = (req, res) => {
     });
 };
 
+const appointmentConfirmationMail = (req, res) => {
+    const { 
+        to,
+        customerName,
+        appointmentDate,
+        salonName,
+        branchName,
+        staffName,
+        services: rawServices,
+        totalAmount
+    } = req.body;
+
+    // Validate required fields first
+    if (!to || !appointmentDate || !salonName || !rawServices) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Normalize services data
+    let services = [];
+    try {
+        // Handle different service formats
+        if (Array.isArray(rawServices)) {
+            services = rawServices.map(s => ({
+                name: s.name || s.service_name || 'Service',
+                price: s.price || s.service_price || 0
+            }));
+        } else if (typeof rawServices === 'object') {
+            services = [{
+                name: rawServices.name || rawServices.service_name || 'Service',
+                price: rawServices.price || rawServices.service_price || 0
+            }];
+        } else {
+            services = [{
+                name: String(rawServices),
+                price: totalAmount || 0
+            }];
+        }
+    } catch (error) {
+        return res.status(400).json({ error: 'Invalid services format' });
+    }
+
+    // Calculate total if not provided
+    const calculatedTotal = totalAmount || services.reduce((sum, s) => sum + (s.price || 0), 0);
+
+    // HTML Template
+    const createAppointmentTemplate = () => {
+        const roseGold = '#b76e79';
+        const logoUrl = 'https://media-hosting.imagekit.io/8c61e3272696411c/logo.png';
+
+        return `
+        <!DOCTYPE html>
+        <html>
+        <style>
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                body {
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    background-color: #f9f9f9;
+                    margin: 0;
+                    padding: 0;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: 20px auto;
+                    background: white;
+                    border-radius: 15px;
+                    overflow: hidden;
+                    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+                    animation: fadeIn 0.5s ease-out;
+                }
+                .header {
+                    background: linear-gradient(135deg, #f3e7e9, ${roseGold});
+                    padding: 30px;
+                    text-align: center;
+                    color: white;
+                }
+                .calendar-icon {
+                    font-size: 48px;
+                    margin-bottom: 15px;
+                }
+                .details-table {
+                    width: 100%;
+                    margin: 25px 0;
+                    border-collapse: collapse;
+                }
+                .details-table td {
+                    padding: 15px;
+                    border-bottom: 1px solid #eee;
+                }
+                .details-table tr:last-child td {
+                    border-bottom: none;
+                }
+                .highlight {
+                    color: ${roseGold};
+                    font-weight: 600;
+                }
+                .service-list {
+                    margin: 20px 0;
+                    padding: 0;
+                    list-style: none;
+                }
+                .service-item {
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 10px 0;
+                    border-bottom: 1px dashed #eee;
+                }
+                .footer {
+                    background: #f8f8f8;
+                    padding: 20px;
+                    text-align: center;
+                    color: #666;
+                    font-size: 14px;
+                }
+                .button {
+                    display: inline-block;
+                    padding: 12px 30px;
+                    background: ${roseGold};
+                    color: white;
+                    text-decoration: none;
+                    border-radius: 25px;
+                    margin: 20px 0;
+                    transition: transform 0.3s ease;
+                }
+                .button:hover {
+                    transform: translateY(-2px);
+                }
+            </style>
+        <body>
+           <div class="container">
+                <div class="header">
+                    <div class="calendar-icon">📅</div>
+                    <h1>Appointment Confirmed!</h1>
+                    <p>See you soon at ${salonName}</p>
+                </div>
+
+                <div style="padding: 30px;">
+                    <p>Hi ${customerName || 'there'},</p>
+                    <p>Your appointment details at <span class="highlight">${salonName}</span>:</p>
+
+                    <table class="details-table">
+                        <tr>
+                            <td>📅 Date & Time</td>
+                            <td class="highlight">${new Date(appointmentDate).toLocaleString()}</td>
+                        </tr>
+                        ${branchName ? `
+                        <tr>
+                            <td>🏪 Branch</td>
+                            <td>${branchName}</td>
+                        </tr>` : ''}
+                        ${staffName ? `
+                        <tr>
+                            <td>💇 Specialist</td>
+                            <td>${staffName}</td>
+                        </tr>` : ''}
+                    </table>
+
+                    <h3>Services Booked</h3>
+                    <ul class="service-list">
+                        ${services.map(service => `
+                        <li class="service-item">
+                            <span>${service.name}</span>
+                            <span>₹${service.price}</span>
+                        </li>`).join('')}
+                    </ul>
+
+                    <div style="text-align: right; margin-top: 25px;">
+                        <h3>Total: ₹${calculatedTotal}</h3>
+                    </div>
+
+                    <center>
+                        <a href="#" class="button">View Appointment Details</a>
+                        <p>Need to reschedule? Contact us at least 2 hours before your appointment</p>
+                    </center>
+                </div>
+                <div class="footer">
+                    <p>${salonName} • ${branchName || 'Main Branch'}</p>
+                    <p>📍 [Salon Address Here] • 📞 [Contact Number]</p>
+                    <p>© ${new Date().getFullYear()} ${salonName}. All rights reserved</p>
+                </div>
+            </div>
+        </body>
+        </html>`;
+    };
+
+    const subject = `✅ Appointment Confirmed at ${salonName}`;
+    const text = `Appointment Confirmation\n\n
+        Date: ${new Date(appointmentDate).toLocaleString()}\n
+        Salon: ${salonName}${branchName ? ` (${branchName})` : ''}\n
+        ${staffName ? `Specialist: ${staffName}\n` : ''}
+        Services:\n${services.map(s => `- ${s.name} (₹${s.price})`).join('\n')}\n
+        Total: ₹${calculatedTotal}\n\n
+        Thank you for choosing ${salonName}!`;
+
+    const mailOptions = {
+        from: process.env.EMAIL_FROM,
+        to,
+        subject,
+        text,
+        html: createAppointmentTemplate(),
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.error('Appointment email error:', error);
+            return res.status(500).json({ 
+                error: 'Failed to send appointment confirmation',
+                details: error.message 
+            });
+        }
+        
+        console.log('Appointment confirmation sent:', info.response);
+        res.status(200).json({
+            message: 'Appointment confirmation sent successfully',
+            info
+        });
+    });
+};
+
+const feedbackRequestMail = (req, res) => {
+    const { 
+        to,
+        userName,
+        salonName,
+        feedbackLink 
+    } = req.body;
+
+    if (!to || !userName || !salonName || !feedbackLink) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // HTML Template
+    const createFeedbackTemplate = () => {
+        const roseGold = '#b76e79';
+        const logoUrl = 'https://media-hosting.imagekit.io/8c61e3272696411c/logo.png';
+
+        return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                body {
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    background-color: #f9f9f9;
+                    margin: 0;
+                    padding: 0;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: 20px auto;
+                    background: white;
+                    border-radius: 15px;
+                    overflow: hidden;
+                    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+                    animation: fadeIn 0.5s ease-out;
+                }
+                .header {
+                    background: linear-gradient(135deg, #f3e7e9, ${roseGold});
+                    padding: 30px;
+                    text-align: center;
+                    color: white;
+                }
+                .chat-icon {
+                    font-size: 48px;
+                    margin-bottom: 15px;
+                    animation: float 3s ease-in-out infinite;
+                }
+                .content {
+                    padding: 30px;
+                }
+                .button {
+                    display: inline-block;
+                    padding: 15px 40px;
+                    background: ${roseGold};
+                    color: white !important;
+                    text-decoration: none;
+                    border-radius: 30px;
+                    margin: 25px 0;
+                    transition: transform 0.3s ease;
+                    font-weight: bold;
+                }
+                .button:hover {
+                    transform: translateY(-3px);
+                    box-shadow: 0 5px 15px rgba(183,110,121,0.3);
+                }
+                .footer {
+                    background: #f8f8f8;
+                    padding: 20px;
+                    text-align: center;
+                    color: #666;
+                    font-size: 14px;
+                }
+                @keyframes float {
+                    0% { transform: translateY(0px); }
+                    50% { transform: translateY(-10px); }
+                    100% { transform: translateY(0px); }
+                }
+                .highlight {
+                    color: ${roseGold};
+                    font-weight: 600;
+                }
+                .note {
+                    color: #666;
+                    font-size: 14px;
+                    margin-top: 20px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <div class="chat-icon">💬</div>
+                    <h1>How Did We Do, ${userName}?</h1>
+                    <p>Your opinion matters to us!</p>
+                </div>
+
+                <div class="content">
+                    <p>Hi ${userName},</p>
+                    <p>We hope you enjoyed your recent experience at <span class="highlight">${salonName}</span>. 
+                    Would you take 2 minutes to share your feedback with us?</p>
+
+                    <center>
+                        <a href="${feedbackLink}" class="button">Share Your Feedback</a>
+                        <p class="note">This link will expire in 7 days</p>
+                    </center>
+
+                    <p>Your honest feedback helps us:</p>
+                    <ul>
+                        <li>✨ Improve our services</li>
+                        <li>💎 Maintain high standards</li>
+                        <li>🎯 Better understand your needs</li>
+                    </ul>
+
+                    <p>Thank you for helping us grow!</p>
+                </div>
+
+                <div class="footer">
+                    <p>${salonName} Team</p>
+                    <p>Need help? Contact us at <span class="highlight">support@salonsphere.com</span></p>
+                </div>
+            </div>
+        </body>
+        </html>
+        `;
+    };
+
+    const subject = `🌟 We Value Your Feedback - ${salonName}`;
+    const text = `Hi ${userName},\n\n`
+               + `We hope you enjoyed your recent visit to ${salonName}!\n\n`
+               + `Please take a moment to share your feedback:\n${feedbackLink}\n\n`
+               + `Your response helps us improve our services.\n\n`
+               + `Thank you!\n`
+               + `The ${salonName} Team`;
+
+    const mailOptions = {
+        from: process.env.EMAIL_FROM,
+        to,
+        subject,
+        text,
+        html: createFeedbackTemplate(),
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.error('Feedback email error:', error);
+            return res.status(500).json({ 
+                error: 'Failed to send feedback request',
+                details: error.message 
+            });
+        }
+        
+        console.log('Feedback request sent:', info.response);
+        res.status(200).json({
+            message: 'Feedback request sent successfully',
+            info
+        });
+    });
+};
 
 
-module.exports = { Sendotp , welcomMail,forgotPasswordMail , passwordResetConfirmation};
+const appointmentCancellationMail = (req, res) => {
+    const { 
+        to,
+        customerName,
+        appointmentDate,
+        salonName,
+        branchName,
+        staffName,
+        services: rawServices,
+        totalAmount
+    } = req.body;
+
+    // Validate required fields
+    if (!to || !appointmentDate || !salonName || !rawServices) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Normalize services data
+    let services = [];
+    try {
+        if (Array.isArray(rawServices)) {
+            services = rawServices.map(s => ({
+                name: s.name || s.service_name || 'Service',
+                price: s.price || s.service_price || 0
+            }));
+        } else if (typeof rawServices === 'object') {
+            services = [{
+                name: rawServices.name || rawServices.service_name || 'Service',
+                price: rawServices.price || rawServices.service_price || 0
+            }];
+        } else {
+            services = [{
+                name: String(rawServices),
+                price: totalAmount || 0
+            }];
+        }
+    } catch (error) {
+        return res.status(400).json({ error: 'Invalid services format' });
+    }
+
+    // HTML Template
+    const createCancellationTemplate = () => {
+        const roseGold = '#b76e79';
+        const logoUrl = 'https://media-hosting.imagekit.io/8c61e3272696411c/logo.png';
+
+        return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                body {
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    background-color: #f9f9f9;
+                    margin: 0;
+                    padding: 0;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: 20px auto;
+                    background: white;
+                    border-radius: 15px;
+                    overflow: hidden;
+                    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+                    animation: fadeIn 0.5s ease-out;
+                }
+                .header {
+                    background: linear-gradient(135deg, #f3e7e9, ${roseGold});
+                    padding: 30px;
+                    text-align: center;
+                    color: white;
+                }
+                .icon {
+                    font-size: 48px;
+                    margin-bottom: 15px;
+                    animation: shake 0.5s ease-in-out;
+                }
+                @keyframes shake {
+                    0% { transform: translateX(0); }
+                    25% { transform: translateX(-10px); }
+                    50% { transform: translateX(10px); }
+                    75% { transform: translateX(-5px); }
+                    100% { transform: translateX(0); }
+                }
+                .details-table {
+                    width: 100%;
+                    margin: 25px 0;
+                    border-collapse: collapse;
+                }
+                .details-table td {
+                    padding: 15px;
+                    border-bottom: 1px solid #eee;
+                }
+                .highlight {
+                    color: ${roseGold};
+                    font-weight: 600;
+                }
+                .reschedule-box {
+                    background: #fff3f4;
+                    border: 2px dashed ${roseGold};
+                    border-radius: 10px;
+                    padding: 20px;
+                    margin: 25px 0;
+                    text-align: center;
+                }
+                .button {
+                    display: inline-block;
+                    padding: 12px 30px;
+                    background: ${roseGold};
+                    color: white;
+                    text-decoration: none;
+                    border-radius: 25px;
+                    margin: 15px 0;
+                    transition: transform 0.3s ease;
+                }
+                .button:hover {
+                    transform: translateY(-2px);
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <div class="icon">❌</div>
+                    <h1>Appointment Cancelled</h1>
+                    <p>We'll miss you at ${salonName}</p>
+                </div>
+
+                <div style="padding: 30px;">
+                    <p>Hi ${customerName},</p>
+                    <p>Your appointment at <span class="highlight">${salonName}</span> has been cancelled:</p>
+
+                    <table class="details-table">
+                        <tr>
+                            <td>📅 Date & Time</td>
+                            <td class="highlight">${new Date(appointmentDate).toLocaleString()}</td>
+                        </tr>
+                        ${branchName ? `
+                        <tr>
+                            <td>🏪 Branch</td>
+                            <td>${branchName}</td>
+                        </tr>` : ''}
+                        ${staffName ? `
+                        <tr>
+                            <td>💇 Specialist</td>
+                            <td>${staffName}</td>
+                        </tr>` : ''}
+                    </table>
+
+                    <div class="reschedule-box">
+                        <h3>Want to Reschedule?</h3>
+                        <p>We'd love to welcome you back!</p>
+                        <a href="#" class="button">Book New Appointment</a>
+                    </div>
+
+                    <div style="text-align: center; color: #666;">
+                        <p>Cancelled Services:</p>
+                        <ul style="list-style: none; padding: 0;">
+                            ${services.map(service => `
+                            <li>${service.name} - ₹${service.price}</li>
+                            `).join('')}
+                        </ul>
+                        <p style="margin-top: 15px;">Total Amount: ₹${totalAmount}</p>
+                    </div>
+                </div>
+
+                <div style="background: #f8f8f8; padding: 20px; text-align: center; color: #666;">
+                    <p>${salonName} • ${branchName || 'Main Branch'}</p>
+                    <p>📍 [Salon Address] • 📞 [Contact Number]</p>
+                    <p>© ${new Date().getFullYear()} ${salonName}</p>
+                </div>
+            </div>
+        </body>
+        </html>`;
+    };
+
+    const subject = `❌ Appointment Cancelled at ${salonName}`;
+    const text = `Appointment Cancellation\n\n
+        Date: ${new Date(appointmentDate).toLocaleString()}\n
+        Salon: ${salonName}${branchName ? ` (${branchName})` : ''}\n
+        ${staffName ? `Specialist: ${staffName}\n` : ''}
+        Cancelled Services:\n${services.map(s => `- ${s.name} (₹${s.price})`).join('\n')}\n
+        Total: ₹${totalAmount}\n\n
+        We hope to see you again soon!`;
+
+    const mailOptions = {
+        from: process.env.EMAIL_FROM,
+        to,
+        subject,
+        text,
+        html: createCancellationTemplate(),
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.error('Cancellation email error:', error);
+            return res.status(500).json({ 
+                error: 'Failed to send cancellation email',
+                details: error.message 
+            });
+        }
+        console.log('Cancellation email sent:', info.response);
+        res.status(200).json({
+            message: 'Cancellation email sent successfully',
+            info
+        });
+    });
+};
+
+// Add to exports
+
+
+
+
+
+
+module.exports = { Sendotp , welcomMail,forgotPasswordMail , passwordResetConfirmation,appointmentConfirmationMail,feedbackRequestMail,appointmentCancellationMail};
