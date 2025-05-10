@@ -128,7 +128,11 @@ const getStaffById = async (req, res) => {
           }
         },
         user: true,
-        branch: true,
+        branch: {
+          include: {
+            salon: true // Add salon relation through branch
+          }
+        },
         appointments: {
           include: {
             service: true,
@@ -154,11 +158,12 @@ const getStaffById = async (req, res) => {
       contact: staff.contact,
       profile_img: staff.profile_img,
       staff_id: staff.staff_id,
-      password:staff.password,
+      password: staff.password,
       branch: {
         id: staff.branch.id,
         name: staff.branch.branch_name,
-        location: staff.branch.branch_location
+        location: staff.branch.branch_location,
+        salon_name: staff.branch.salon.salon_name // Add salon name here
       },
       user: {
         id: staff.user.id,
@@ -180,7 +185,7 @@ const getStaffById = async (req, res) => {
         time: appointment.time,
         status: appointment.status,
         service: appointment.service.service_name,
-        service_price:appointment.service.service_price,
+        service_price: appointment.service.service_price,
         client: appointment.client.client_name
       })),
       clients: staff.clients.map(client => ({
