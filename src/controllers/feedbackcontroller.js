@@ -111,4 +111,42 @@ async function getAppointmentDetails(req, res) {
     }
 }
 
-module.exports = {updateFeedbackFeature,getAppointmentDetails} ;
+
+
+// Feedback Endpoint
+const addfeedback = async (req, res) => {
+  try {
+    const { client_id, branch_id, staff_id, rating, review } = req.body;
+
+    // Validation
+    if (!appointmentId || !rating || !review) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+    
+    if (rating < 1 || rating > 5) {
+      return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+    }
+
+   
+
+    // Create feedback
+    const feedback = await prisma.feedback.create({
+      data: {
+        client_id,
+        branch_id,
+        staff_id,
+        rating,
+        review
+      }
+    });
+    res.status(201).json(feedback);
+
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+
+module.exports = {updateFeedbackFeature,getAppointmentDetails,addfeedback} ;

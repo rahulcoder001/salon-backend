@@ -892,7 +892,7 @@ const appointmentConfirmationMail = (req, res) => {
                 <div class="header">
                     <div class="calendar-icon">📅</div>
                     <h1>Appointment Confirmed!</h1>
-                    <p>See you soon at ${salonName}</p>
+                    // <p>See you soon at ${salonName}</p>
                 </div>
 
                 <div style="padding: 30px;">
