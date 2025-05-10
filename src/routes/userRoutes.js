@@ -6,8 +6,10 @@ const {
   getUserById,  // ✅ Step 1: Import the controller
   updateUser,
   getUsersByPeriod,
-  getAllUsersWithContactInfo
+  getAllUsersWithContactInfo,
+  salesmanLogin
 } = require("../controllers/userController");
+const { salesmanSalary } = require("../config/db");
 
 const router = express.Router();
 
@@ -21,7 +23,8 @@ router.post("/forgetpassword", changePassword);
 router.get("/getalluser",getUsersByPeriod)
 router.get("/getallusercontactinfo",getAllUsersWithContactInfo)
 router.get("/:user_id", getUserById);
-router.put("/:user_id",updateUser)
+router.put("/:user_id",updateUser);
+router.post("/salesman",salesmanLogin)
 
 
 

@@ -118,16 +118,14 @@ const addfeedback = async (req, res) => {
   try {
     const { client_id, branch_id, staff_id, rating, review } = req.body;
 
-    // Validation
-    if (!appointmentId || !rating || !review) {
-      return res.status(400).json({ error: 'Missing required fields' });
+    // Validation: Check required fields
+    if (!client_id || !branch_id || !staff_id || !rating || !review) {
+      return res.status(400).json({ error: 'Missing required fields: client_id, branch_id, staff_id, rating, or review' });
     }
     
     if (rating < 1 || rating > 5) {
       return res.status(400).json({ error: 'Rating must be between 1 and 5' });
     }
-
-   
 
     // Create feedback
     const feedback = await prisma.feedback.create({
@@ -146,6 +144,8 @@ const addfeedback = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+
 
 
 

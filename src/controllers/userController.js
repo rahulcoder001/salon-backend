@@ -349,6 +349,46 @@ const getAllUsersWithContactInfo = async (req, res) => {
   }
 };
 
+const salesmanLogin = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    // Validate email presence
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    // Find salesman by email
+    const salesman = await prisma.salesman.findUnique({
+      where: { email },
+    });
+
+    if (!salesman) {
+      return res.status(404).json({ message: "Salesman not found" });
+    }
+
+    // Generate JWT token with salesman ID
+    const token = generateToken(salesman.id, "salesman");
+
+    // Omit sensitive fields from response
+    const { password, ...salesmanData } = salesman;
+
+    res.status(200).json({
+      success: true,
+      message: "Salesman logged in successfully",
+      token,
+      salesman: salesmanData,
+    });
+  } catch (error) {
+    console.error("Salesman login error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
 
 
 module.exports = {
@@ -358,5 +398,6 @@ module.exports = {
   getUserById, 
    updateUser,
    getUsersByPeriod,
-   getAllUsersWithContactInfo
+   getAllUsersWithContactInfo,
+   salesmanLogin
 };
