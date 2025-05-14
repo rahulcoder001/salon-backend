@@ -9,7 +9,7 @@ const {
   getAllUsersWithContactInfo,
   salesmanLogin
 } = require("../controllers/userController");
-const { salesmanSalary } = require("../config/db");
+
 
 const router = express.Router();
 
