@@ -112,4 +112,83 @@ const deletePackage = async (req, res) => {
   }
 };
 
-module.exports = {getAllPackages ,createPackage, updatePackage,deletePackage }
+
+
+const purchasePlan = async (req, res) => {
+  try {
+    const { userId, packageId } = req.body;
+
+    // Validate user and package
+    const [user, package] = await Promise.all([
+      prisma.user.findUnique({ where: { id: userId }}),
+      prisma.subscriptionPackage.findUnique({ where: { id: packageId }})
+    ]);
+
+    if (!user || !package) {
+      return res.status(404).json({ message: 'User or package not found' });
+    }
+
+    // Check if it's a free plan
+    if (package.price === 0) {
+      // Automatically activate free plan
+      const [updatedUser, purchasedPlan] = await prisma.$transaction([
+        prisma.user.update({
+          where: { id: userId },
+          data: { activePlanId: packageId }
+        }),
+        prisma.purchasedPlan.create({
+          data: {
+            userId,
+            packageId,
+            date: new Date()
+          }
+        })
+      ]);
+
+      return res.status(200).json({
+        message: 'Free plan activated successfully',
+        purchasedPlan,
+        user: updatedUser
+      });
+    }
+
+    // For paid plans (will integrate payment gateway later)
+    return res.status(200).json({
+      message: 'Proceed to payment',
+      paymentRequired: true,
+      amount: package.price,
+      packageId
+    });
+
+  } catch (error) {
+    console.error('Purchase error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+const checkPlanExpiration = () => {
+  cron.schedule('0 0 * * *', async () => { // Runs daily at midnight
+    try {
+      const expirationDate = dayjs().subtract(30, 'day').toDate();
+      
+      await prisma.user.updateMany({
+        where: {
+          activePlan: {
+            PurchasedPlan: {
+              some: {
+                date: { lte: expirationDate }
+              }
+            }
+          }
+        },
+        data: { activePlanId: null }
+      });
+      
+      console.log('Plan expiration check completed');
+    } catch (error) {
+      console.error('Plan expiration error:', error);
+    }
+  });
+};
+
+module.exports = {getAllPackages ,createPackage, updatePackage,deletePackage,purchasePlan,checkPlanExpiration }

@@ -1,5 +1,5 @@
 const express = require("express");
-const { getAllPackages, createPackage, updatePackage, deletePackage } = require("../controllers/pakageController");
+const { getAllPackages, createPackage, updatePackage, deletePackage, purchasePlan } = require("../controllers/pakageController");
 
 
 const router = express.Router();
@@ -14,5 +14,7 @@ router.put('/update/:id', updatePackage);
 
 // DELETE /packages/:id
 router.delete('/delete/:id', deletePackage);
+
+router.post("/buy",purchasePlan)
  
 module.exports = router;

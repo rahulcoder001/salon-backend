@@ -20,7 +20,8 @@ const attendenceRoutes = require("./routes/attendanceRoutes");
 const pakageRoutes = require("./routes/pakageRoutes.js")
 const salespersonRoutes=require("./routes/salesRoutes.js")
 const purchasedplanRoutes=require("./routes/purchasedplanRoutes.js")
-const adminFinaneRoutes = require("./routes/financeRoutes.js")
+const adminFinaneRoutes = require("./routes/financeRoutes.js");
+const { checkPlanExpiration } = require("./controllers/pakageController.js");
 const app = express();
 
 // Middlewares
@@ -53,6 +54,7 @@ app.options('*', cors(corsOptions)); // handle preflight requests
 app.use(helmet());
 app.use(compression());
 app.use(morgan("dev"));
+checkPlanExpiration();
 
 // Routes
 app.use("/api/users", userRoutes);
