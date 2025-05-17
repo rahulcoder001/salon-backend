@@ -123,7 +123,8 @@ const getUserById = async (req, res) => {
         profile_img: true,
         salonId: true,
         step: true,
-        salon:true
+        salon:true,
+        activePlanId:true
       },
     });
 

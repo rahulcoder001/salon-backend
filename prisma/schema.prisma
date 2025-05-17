@@ -242,12 +242,16 @@ model ownerFeedback {
 }
 
 model PurchasedPlan {
-  id        String   @id @default(uuid())
-  userId    String
-  packageId String
-  date      DateTime @default(now())
+  id                String   @id @default(uuid())
+  userId            String
+  packageId         String
+  date              DateTime @default(now())
+  // Add payment fields
+  paymentId         String?
+  razorpayOrderId   String?
+  razorpaySignature String?
+  paymentDetails    String?
 
-  // Relations
   user    User                @relation(fields: [userId], references: [id])
   package SubscriptionPackage @relation("PackageToPlan", fields: [packageId], references: [id])
 }

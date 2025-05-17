@@ -1,20 +1,35 @@
 const express = require("express");
-const { getAllPackages, createPackage, updatePackage, deletePackage, purchasePlan } = require("../controllers/pakageController");
-
+const { 
+  getAllPackages,
+  createPackage,
+  updatePackage,
+  deletePackage,
+  purchasePlan,
+  getpackagesbyid,
+  verifyPayment
+} = require("../controllers/pakageController");
 
 const router = express.Router();
 
+// Get all packages
 router.get('/getall', getAllPackages);
 
-// POST /packages
+// Get single package by ID
+router.get('/:id', getpackagesbyid);
+
+// Create new package
 router.post('/add', createPackage);
 
-// PUT /packages/:id
+// Update package
 router.put('/update/:id', updatePackage);
 
-// DELETE /packages/:id
+// Delete package
 router.delete('/delete/:id', deletePackage);
 
-router.post("/buy",purchasePlan)
- 
+// Purchase plan
+router.post("/buy", purchasePlan);
+
+// Verify payment
+router.post("/verify-payment", verifyPayment);
+
 module.exports = router;
