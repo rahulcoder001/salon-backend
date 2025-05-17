@@ -6,8 +6,8 @@ const { Prisma } = require("@prisma/client");
 const crypto = require('crypto');
 // Initialize Razorpay
 const razorpay = new Razorpay({
-  key_id: "",
-  key_secret: ""
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
 // 1. Get All Packages
